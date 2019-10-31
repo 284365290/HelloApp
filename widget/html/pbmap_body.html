@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>地图导航</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/egret.css" />
+		<style>
+			body {
+				height: 100%;
+			}
+			.br {
+				border-right: 1px solid #A5A5A5;
+			}
+			.bl {
+				border-right: 1px solid #232323;
+			}
+			/* 上部效果 */
+			.play-up {
+				position: relative;
+				height: 46px;
+			}
+			.userinfo {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				display: -webkit-box;
+				background-color: #FFFFFF;/*padding: 10px 0;*/
+			}
+			.userinfo .userinfocol {
+				-webkit-box-flex: 1;
+				text-align: center;
+				width: 50px;
+				height: 50px;
+			}
+			.userinfo .userinfocol .info {
+				font-size: 0.7em;
+				color: #3A9DD3;
+				padding-bottom: 5px;
+			}
+			.userinfo .userinfocol .num {
+				padding-top: 5px;
+				font-weight: bold;
+				color: #3A9DD3;
+			}
+			/* 底部控制 */
+			.play-control {
+				position: absolute;
+				width: 100%;
+				bottom: 0;
+				height: 60px;
+			}
+			.play-control .loopmode {
+				position: absolute;
+				left: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .controllist {
+				position: absolute;
+				right: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .play-control-bar {
+				position: absolute;
+				left: 60px;
+				right: 60px;
+				height: 60px;
+			}
+			.play-control .play-control-bar img {
+				width: 50px;
+				padding-top: 5px;
+				position: absolute;
+			}
+			.play-control .play-control-bar .play-control-bar-bg {
+				height: 40px;
+				margin-top: 10px;
+				background-color: #05a0f5;
+				border-radius: 20px;
+				width: 90%;
+			}
+			.play-control .play-control-bar-bg .play {
+				text-align: center;
+				line-height: 40px;
+				color: #fff;
+				font-size: 20px;
+				height: 40px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="play-up">
+			<div class="userinfo play-up-toolbar " id="luxian">
+				<div class="userinfocol02 userinfocol">
+					<div class="num" id="fare">
+						
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		</div>
+		<div class="play-control" id="footer">
+			<img src="../image/musicplay/icon_telephone.png" alt="" class="controllist" data-tel="" id="tel"  onclick="Call(this)">
+			<div class="play-control-bar" data-click="0" id ="startTravel" onclick="startTravel(this)">
+				<div class="play-control-bar-bg">
+					<div class="play">
+						已接到乘客
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		//订单变量
+		var mobile = null;
+		var startT = 0;
+		window.onload = function() {
+			var playbg = document.getElementsByClassName('play-up')[0];
+			playbg.style.height = document.documentElement.clientHeight - 60 + 'px';
+			//playbg.style.width = document.documentElement.clientWidth + 'px';
+			// 计时 接到乘客所用的时间
+		}
+		function startTravel(button) {
+			var dataClick = button.getAttribute("data-click");
+			if (dataClick == 1) {//已经接到乘客
+				
+				
+							$api.rmStorage('arrive');
+							$api.rmStorage('distance');
+							$api.rmStorage('oid');
+							api.closeWin({
+								type : 'flip',
+								subType : 'from_bottom',
+								duration : 500
+							});
+
+				//计费结束
+			} else {
+				api.confirm({
+					title : '乘车上车状态',
+					msg : '确定乘客已上车？',
+					buttons : ['确定', '取消']
+				}, function(ret, err) {
+					if (ret.buttonIndex == 1) {
+						startT = 1;
+						$api.setStorage('arrive', 2);
+						button.setAttribute("data-click", 1);
+						document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+						var img = document.getElementsByTagName("img");
+						//更新服务器
+					}
+				});
+			}
+		}
+
+		function Call(button) {
+			var dialogBox = api.require('dialogBox');
+			var jsonObj_pageParam = api.pageParam;
+		 alert(JSON.stringify(jsonObj_pageParam));
+			var items = [];//数据源
+			for(var i =0;i<jsonObj_pageParam.length;i++){
+			    data = {
+			         text: jsonObj_pageParam[i]['address'],
+       				 icon: 'widget://image/phone_normal.png'
+			          }
+			     items.push(data);
+			 }
+			dialogBox.share({
+				rect : {
+					w : 300,
+					h : 300
+				},
+				items : items,
+				tapClose : true,
+				styles : {
+					bg : '#FFF',
+					column : 3,
+					horizontalSpace : 15,
+					verticalSpace : 30,
+					itemText : {
+						color : '#000',
+						size : 15,
+						marginT : 10
+					},
+					itemIcon : {
+						size : 80
+					}
+				}
+			}, function(ret) {
+				var k = ret.index;
+				api.call({
+				type : 'tel_prompt',
+				number : jsonObj_pageParam[k]['mobile']
+			});
+			});
+		}
+
+		apiready = function() {
+			var router = false;
+			var startSuccess = false;
+			var startLon;
+			var startLat;
+			var footer = $api.byId('footer');
+			$api.fixIos7Bar(footer);
+			var footerPos = $api.offset(footer);
+			var map = api.require('bMap');
+			var lon = 117.2954330000;
+			var lat = 40.0878530000;
+			var lonPassenger = null;
+			var latPassenger = null;
+			$api.setStorage('arrive', 1);
+			//查询订单
+			var luxian = $api.getStorage('luxian');
+			document.getElementById('fare').innerHTML = luxian;
+			//页面被异常关闭，恢复之前数据
+			if ($api.getStorage('from') == 2) {
+				$api.rmStorage('from');
+				startT = 1;
+				var tfar = $api.byId('fare');
+				var timeValue = $api.html(tfar);
+				$api.setStorage('arrive', 2);
+				document.getElementById('startTravel').setAttribute("data-click", 1);
+				document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+				var img = document.getElementsByTagName("img");
+				clearInterval(timeIndex);
+				document.getElementById('footer').removeChild(img[0]);
+				document.getElementsByClassName('num')[0].innerHTML = "0.0";
+				document.getElementsByClassName('info')[0].innerHTML = "里程";
+				document.getElementsByClassName('num')[1].innerHTML = "0";
+				document.getElementsByClassName('info')[1].innerHTML = "费用";
+			}
+			//end
+			map.open({//打开百度地图
+				rect : {
+					x : 0,
+					y : 0,
+					w : 'auto',
+					h : api.frameHeight - footerPos.h - 70
+				},
+				center : {
+					lon : 116.4021310000,
+					lat : 39.9994480000
+				},
+				zoomLevel : 15,
+				showUserLocation : true,
+				fixedOn : 'bmap_body',
+				fixed : true
+			}, function(ret) {
+				if (ret.status) {
+					//alert('地图打开成功');
+				}
+			});
+			//获取司机当前位置
+			map.getLocation({
+				accuracy : '10m',
+				autoStop : false,
+				filter : 20
+			}, function(ret, err) {
+				if (ret.status) {//获取司机位置返回成功
+					lon = ret.lon;
+					lat = ret.lat;
+					if (router == false)//判断是否已经规划过路线
+					{
+						//规划路线
+						map.searchRoute({
+							id : 1,
+							type : 'drive',
+							policy : 'ecar_fee_first',
+							start : {
+								lon : lon,
+								lat : lat
+							},
+							end : {
+								lon : lonPassenger, //乘客位置精
+								lat : latPassenger
+							}
+						}, function(ret, err) {
+							if (ret.status) {
+								router = true;
+								//将规划的路线绘制到地图上
+								map.drawRoute({
+									id : 1,
+									autoresizing : false,
+									index : 0,
+									styles : {
+										start : {
+											icon : 'widget://image/bmap_start.png'
+										},
+										end : {
+											icon : 'widget://image/bmap_end.png'
+										}
+									}
+								}, function(ret) {
+									api.alert({
+										msg : JSON.stringify(ret)
+									});
+								});
+							} else {
+								/*api.toast({
+								 msg : '规划路线失败code' + err.code,
+								 duration : 2000,
+								 location : 'bottom'
+								 });*/
+							}
+						});
+					}
+				} else {
+					api.toast({
+						msg : '获取司机位置失败code:' + err.code,
+						duration : 2000,
+						location : 'bottom'
+					});
+				}
+			});
+			//显示司机当前位置
+			map.showUserLocation({
+				isShow : true,
+				trackingMode : 'follow'
+			});
+		}
+	</script>
+</html>

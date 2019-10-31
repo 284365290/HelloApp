@@ -1,0 +1,355 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>实时订单</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/egret.css" />
+		<style>
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+				height: 50px;
+			}
+			.egret-header-title .musicname {
+				color: #fff;
+				font-size: 18px;
+			}
+			.egret-header-title .concel {
+				position: absolute;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 12px;
+				height: 50px;
+				right: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 第二头部 -->
+		<div id="secHeader" class="titlebar">
+			<div class="egret-header topbar">
+				<div class="egret-header-title">
+					<div class="concel" onclick="concel()">
+						取消订单
+					</div>
+					<div class="musicname">
+						去接乘客
+					</div>
+				</div>
+				<div  class="egret-img"><img src="../image/maprouter_navi_zichedian_location.png" alt="" onclick="navigate()">
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		var isbmapOpen = false;
+		var tlon = '';
+		var tlat = '';
+		var siteUrl = '';
+		function navigate() {
+			//从服务器或者起点终点的经纬度坐标
+			var oidNum = $api.getStorage('oid');
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						oid : oidNum,
+						op : 18
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					var arriveStatus = $api.getStorage('arrive');
+					if (arriveStatus == 2) {
+						tlon = ret.elon;
+						tlat = ret.elat;
+					} else {
+						tlon = ret.slon;
+						tlat = ret.slat;
+					}
+					if ((!tlon) || (!tlat)) {
+						api.toast({
+							msg : '该路径无法导航',
+							duration : 2000,
+							location : 'bottom'
+						});
+						return false;
+					}
+					var map = api.require('bMap');
+					map.transCoords({
+						type : "common",
+						lon : tlon,
+						lat : tlat,
+						mcode : '0B:07:B0:15:A7:37:E7:FD:B8:78:F6:A1:06:FC:75:44:A4:8A:A7:B4;com.dududache.xmb'
+					}, function(ret, err) {
+						var lonPassenger = ret.lon;
+						var latPassenger = ret.lat;
+						//var loc = latPassenger+','+ lonPassenger;//外部导航
+						//window.location.href = 'bdapp://map/navi?location='+loc;//外部导航
+						//内置导航
+						api.showProgress({
+							style : 'default',
+							animationType : 'zoom',
+							title : '正在规划路线',
+							text : '请稍后',
+							modal : false
+						});
+						var baiduNavigation = api.require('baiduNavigation');
+						map.getLocation({
+							accuracy : '100m',
+							autoStop : true,
+							filter : 1
+						},
+						function(ret, err) {
+							if (ret.status) {
+								baiduNavigation.start({
+									start : {// 起点信息.
+										position : {// 经纬度，与address配合可为空
+											lon : ret.lon, // 经度.
+											lat : ret.lat // 纬度.
+										}
+									},
+									end : {// 终点信息.
+										position : {// 经纬度，与address配合可为空
+											lon : lonPassenger, // 经度
+											lat : latPassenger // 纬度
+										}
+									}
+								}, function(ret, err) {
+									if (ret.status) {
+										api.hideProgress();
+									} else {
+										api.hideProgress();
+									}
+								});
+								//alert(JSON.stringify(ret));
+							} else {
+								api.hideProgress();
+								//alert(err.code);
+							}
+						});
+						//内置导航end
+					});
+				} else {
+					api.toast({
+						msg : '发生网络连接错误，请检查手机网络',
+						duration : 2000,
+						location : 'bottom'
+					});
+				}
+			});
+		}
+
+		function concel() {
+			var arriveStatus = $api.getStorage('arrive');
+			if (arriveStatus == 2) {
+				api.toast({
+					msg : '您已接到乘客，无法取消订单',
+					duration : 2000,
+					location : 'bottom'
+				});
+			} else {
+				var dialogBox = api.require('dialogBox');
+				dialogBox.raffle({
+					texts : {
+						title : '乘客正在焦急等待~',
+						mainText : '司机不可单方取消订单，以下原因方可取消',
+						subText : '1.乘客电话打不通或不接，联系不上乘客\n2.遇到堵车，乘客着急，不愿等待          \n3.车辆临时故障，与乘客沟通后，乘客   \n同意取消                                           ',
+						leftTitle : '去接乘客',
+						rightTitle : '继续取消'
+					},
+					styles : {
+						bg : '#fff',
+						w : 300,
+						corner : 10,
+						title : {
+							size : 15,
+							color : '#000'
+						},
+						icon : {
+							marginT : 20,
+							w : 40,
+							h : 40,
+							iconPath : 'widget://image/common_icn_information.png'
+						},
+						main : {
+							marginT : 20,
+							color : '#636363',
+							size : 14
+						},
+						sub : {
+							marginT : 8,
+							color : '#999999',
+							size : 15
+						},
+						left : {
+							marginB : 7,
+							marginL : 18,
+							w : 130,
+							h : 35,
+							corner : 2,
+							bg : '#fff',
+							color : '#007FFF',
+							size : 16
+						},
+						right : {
+							marginB : 7,
+							marginL : 18,
+							w : 130,
+							h : 35,
+							corner : 2,
+							bg : '#fff',
+							color : '#007FFF',
+							size : 16
+						}
+					},
+					tapClose : true
+				}, function(ret, err) {
+					if (ret) {
+						if (ret.eventType == 'left') {
+							dialogBox.close({
+								dialogName : 'raffle'
+							});
+						}
+						if (ret.eventType == 'right') {
+							//更新订单信息
+							var oidNum = $api.getStorage('oid');
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										oid : oidNum,
+										op : '4'
+									}
+								}
+							}, function(ret, err) {
+								if (ret) {
+									$api.rmStorage('arrive');
+									$api.rmStorage('oid');
+									$api.rmStorage('time');
+									api.closeWin({
+										type : 'flip',
+										subType : 'from_bottom',
+										duration : 500
+									});
+									dialogBox.close({
+										dialogName : 'raffle'
+									});
+									api.toast({
+										msg : '您已取消订单',
+										duration : 2000,
+										location : 'bottom'
+									});
+								} else {
+									alert(JSON.stringify(err));
+								}
+							});
+						}
+					} else {
+						dialogBox.close({
+							dialogName : 'raffle'
+						});
+						api.toast({
+							msg : '无法取消订单，请检查网络',
+							duration : 2000,
+							location : 'bottom'
+						});
+					}
+				});
+			}
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var header = $api.byId('secHeader');
+			$api.fixIos7Bar(header);
+			var headerPos = $api.offset(header);
+			var frmHeight = api.winHeight - headerPos.h;
+			var bmapName = 'bmap_body';
+			var bmapUrl = './bmap_body.html';
+			var systemType = api.systemType;
+			if (systemType == 'ios') {
+				//bmapName = 'bmap_ios_body';
+				bmapUrl = './bmap_ios_body.html';
+			}
+			api.openFrame({
+				name : bmapName,
+				url : bmapUrl,
+				bounces : false,
+				opaque : false,
+				pageParam : {
+					height : frmHeight
+				},
+				rect : {
+					x : 0,
+					y : headerPos.h,
+					w : 'auto',
+					h : frmHeight
+				}
+			});
+			//监听订单状态
+			api.addEventListener({
+				name : 'startT'
+			}, function(ret, err) {
+				document.getElementsByClassName('musicname')[0].innerHTML = '去送乘客';
+				document.getElementsByClassName('concel')[0].innerHTML = '';
+			});
+			//监听回退键
+			api.addEventListener({
+				name : 'keyback'
+			}, function(ret, err) {
+				//operation
+			});
+			//监听网络
+			api.addEventListener({
+				name : 'offline'
+			}, function(ret, err) {
+				//operation
+				api.toast({
+					msg : '网络错误,请检查网络设置',
+					duration : 2000,
+					location : 'bottom'
+				});
+			});
+			//监听gps事件
+			var gpsmodel = api.require('gpsState');
+			gpsmodel.gpsstate(function(ret) {
+				if (ret.gps == false) {
+					gpsmodel.opengps();
+				}
+			});
+			//禁止屏幕休眠
+			api.setKeepScreenOn({
+				keepOn : true
+			});
+			//测试自动回到前台
+			api.openApp({
+				androidPkg : 'com.dududache.xmb',
+				mimeType : 'text/html',
+				uri : ''
+			}, function(ret, err) {
+			});
+		}
+	</script>
+</html>

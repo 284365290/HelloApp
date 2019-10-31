@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+		<style>
+			body {
+			}
+			#startaddress {
+				width: 100%;
+				border-bottom: 1px solid #d9d9d9;
+				padding:25px 0 25px 0;
+				text-align: center;
+				font-size: 20px;
+				font-weight: bold;
+				color: #3b3737;
+			}
+			/* 底部控制 */
+			.play-control {
+				position: absolute;
+				width: 100%;
+				bottom: 0;
+				height: 60px;
+			}
+			.play-control .loopmode {
+				position: absolute;
+				left: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .controllist {
+				position: absolute;
+				right: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .play-control-bar {
+				position: absolute;
+				left: 60px;
+				right: 60px;
+				height: 60px;
+			}
+			.play-control .play-control-bar img {
+				width: 50px;
+				padding-top: 5px;
+				position: absolute;
+			}
+			.play-control .play-control-bar .play-control-bar-bg {
+				height: 40px;
+				margin-top: 10px;
+				background-color: #05a0f5;
+				border-radius: 20px;
+				width: 90%;
+			}
+			.play-control .play-control-bar-bg .play {
+				text-align: center;
+				line-height: 40px;
+				color: #fff;
+				font-size: 20px;
+				height: 40px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id ="startaddress"></div>
+		<div class="play-control" id="footer">
+			<img src="../../image/musicplay/icon_telephone.png" alt="" class="controllist" data-tel="" id="tel"  onclick="Call(this)">
+			<div class="play-control-bar" data-click="0" id ="startTravel" onclick="startTravel(this)">
+				<div class="play-control-bar-bg">
+					<div class="play">
+						已接到乘客
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+		var mobile = null;
+		var id = null;
+		var orderAll = null;
+		var index = 0;
+		var routerid = 0;
+		var router = false;
+		var orderAll = [];
+		var router = false;
+		var siteUrl = '';
+		function Call(button) {
+			//alert(mobile);
+			api.call({
+				type : 'tel_prompt',
+				number : mobile
+			});
+		}
+
+		function startTravel(button) {
+			if (orderAll[index].Status == 3) {//已经接到乘客
+		      api.confirm({
+					title : '提醒',
+					msg : '确定已送达？',
+					buttons : ['确定', '取消']
+				}, function(ret, err) {
+					if (ret.buttonIndex == 1) {
+						//更新服务器
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										poid : id,
+										status : 4,
+										op : 17
+									}
+								}
+							}, function(ret, err) {
+								if (ret) {
+									//删除数据库响应的字段
+									var db = api.require('db');
+									var sqlDelete = "delete from DataPinChe WHERE Id = " + id + ";";
+									db.executeSql({
+										name : 'order',
+										sql : sqlDelete
+									}, function(ret, err) {
+										if (ret.status) {
+											//alert(JSON.stringify(ret));
+										} else {
+											alert(JSON.stringify(err));
+										}
+									});
+									//发送刷新事件
+									api.sendEvent({
+										name : 'myPinCheOrder',
+										extra : {
+											key : 'click'
+										}
+									});
+									api.closeWin({
+										type : 'flip',
+										subType : 'from_bottom',
+										duration : 500
+									});
+								} else {
+									alert('网络连接失败，请重试！');
+								}
+							});
+				}
+				});
+			} else {//已经到达乘客所在位置
+				api.confirm({
+					title : '提醒',
+					msg : '确定已上车？',
+					buttons : ['确定', '取消']
+				}, function(ret, err) {
+					if (ret.buttonIndex == 1) {
+						//更新服务器
+						api.ajax({
+							url : siteUrl,
+							method : 'post',
+							timeout : 30,
+							dataType : 'json',
+							returnAll : false,
+							data : {
+								values : {
+									poid : id,
+									status : 3,
+									op : 17
+								}
+							}
+						}, function(ret, err) {
+							if (ret) {
+								//更新本地数据库
+								orderAll[index].Status = 3;
+								var db = api.require('db');
+								var sqlUpdate = "update DataPinChe set Status = '3' WHERE Id =" + id + ";";
+								db.executeSql({
+									name : 'order',
+									sql : sqlUpdate
+								}, function(ret, err) {
+									if (ret.status) {
+										//alert(JSON.stringify(ret));
+									} else {
+										alert(JSON.stringify(err));
+									}
+								});
+								if(orderAll[index].Type == 'view_huoyun'){//增加货运
+									document.getElementById('startaddress').innerHTML = orderAll[index].End + "(收件人" + orderAll[index].Sname + ")";
+									document.getElementsByClassName('play')[0].innerHTML = "结束订单";
+									document.getElementsByTagName("img")[0].style.display = "block";
+									mobile = orderAll[index].Stel;
+								}else{
+									document.getElementById('startaddress').innerHTML = orderAll[index].End + "(尾号" + orderAll[index].Mobile.substr(7) + ")";
+									document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+									document.getElementsByTagName("img")[0].style.display = "none";
+								}
+								var map = api.require('bMap');
+								map.stopLocation();
+								map.removeRoute({
+									ids : [routerid] //删除导航路线图
+								});
+								router = false;
+							} else {
+								alert('网络连接失败，请重试！');
+							}
+						});
+					}
+				});
+			}
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			id = api.pageParam.id;
+			//乘客下拉列表
+			var header = $api.byId('secHeader');
+			$api.fixIos7Bar(header);
+			var headerPos = $api.offset(header);
+			var MNNavigationMenu = api.require('MNNavigationMenu');
+			var db = api.require('db');
+			var map = api.require('bMap');
+			var sql = "select * from DataPinChe;";
+			db.selectSql({
+				name : 'order',
+				sql : sql
+			}, function(ret, err) {
+				if (ret.status) {
+					orderAll = ret.data;
+					var datas = [];
+					if (ret.data.length > 0) {
+						for (var i = 0; i < ret.data.length; i++) {
+							if (ret.data[i].Id == id) {
+								index = i;
+							}
+							var lastNum = ret.data[i].Mobile.substr(7);
+							var data = {
+								title : '尾号 ' + lastNum,
+								icon : ret.data[i].Img,
+								active : ret.data[i].Img,
+								highlight : ret.data[i].Img
+							};
+							datas.push(data);
+						}
+						//加入隐藏导航栏
+						MNNavigationMenu.open({
+							rect : {
+								x : 0,
+								y : 0,
+								w : api.winWidth,
+								h : 75
+							},
+							index : 0,
+							animation : false,
+							styles : {
+								column : 4,
+								bg : '#fff',
+								item : {
+									width : api.winWidth / 4,
+									bg : '#fff',
+									active : '#fff',
+									highlight : '#fff',
+									title : {
+										marginB : 2,
+										size : 14,
+										height : 14,
+										color : '#888',
+										active : '#000',
+										highlight : '#f00',
+										ttf : 'Alkatip Basma Tom'
+									},
+									icon : {
+										marginT : 0,
+										width : 50,
+										height : 50,
+										corner : 2
+									}
+								}
+							},
+							items : datas,
+							fixedOn : api.frameName,
+							fixed : false
+						}, function(ret, err) {
+							if (ret) {
+								index = ret.index;
+								mobile = orderAll[index].Mobile;
+								//显示该乘客数据
+								if (orderAll[index].Status == 3) {
+									if(orderAll[index].Type == 'view_huoyun'){//增加货运
+										document.getElementById('startaddress').innerHTML = orderAll[index].End + "(收件人" + orderAll[index].Sname + ")";
+										document.getElementsByClassName('play')[0].innerHTML = "结束订单";
+										document.getElementsByTagName("img")[0].style.display = "block";
+										mobile = orderAll[index].Stel;
+									}else{
+										document.getElementById('startaddress').innerHTML = orderAll[index].End + "(尾号" + orderAll[index].Mobile.substr(7) + ")";
+										document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+										document.getElementsByTagName("img")[0].style.display = "none";
+									}
+								} else {
+									if(orderAll[index].Type == 'view_huoyun'){//增加货运
+										document.getElementById('startaddress').innerHTML = orderAll[index].Start + "(寄件人" + orderAll[index].Jname + ")";
+										document.getElementsByClassName('play')[0].innerHTML = "已接到货物";
+										document.getElementsByTagName("img")[0].style.display = "block";
+									}else{
+										document.getElementById('startaddress').innerHTML = orderAll[index].Start + "(尾号" + orderAll[index].Mobile.substr(7) + ")";
+										document.getElementsByClassName('play')[0].innerHTML = "已接到乘客";
+										document.getElementsByTagName("img")[0].style.display = "block";
+									}
+									
+									
+								}
+								var map = api.require('bMap');
+								map.stopLocation();
+								map.removeRoute({
+									ids : [routerid] //删除导航路线图
+								});
+								router = false;
+								map.setZoomLevel({
+									level : 13
+								});
+								MNNavigationMenu.hide();
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+						MNNavigationMenu.hide();
+						//显示该乘客数据
+						mobile = orderAll[index].Mobile;
+						if (orderAll[index].Status == 3) {
+							if(orderAll[index].Type == 'view_huoyun'){//增加货运
+							 document.getElementById('startaddress').innerHTML = orderAll[index].End + "(收件人" + orderAll[index].Sname + ")";
+							 document.getElementsByClassName('play')[0].innerHTML = "结束订单";
+							 document.getElementsByTagName("img")[0].style.display = "block";
+							 mobile = orderAll[index].Stel;
+							}else{
+							document.getElementById('startaddress').innerHTML = orderAll[index].End + "(尾号" + orderAll[index].Mobile.substr(7) + ")";
+							document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+							document.getElementsByTagName("img")[0].style.display = "none";
+							}
+							//document.getElementById('footer').removeChild(img[0]);
+						} else {
+							if(orderAll[index].Type == 'view_huoyun'){//增加货运
+							document.getElementById('startaddress').innerHTML = orderAll[index].Start + "(寄件人" + orderAll[index].Jname + ")";
+							document.getElementsByClassName('play')[0].innerHTML = "已接到货物";
+							document.getElementsByTagName("img")[0].style.display = "block";
+							}else{
+							document.getElementById('startaddress').innerHTML = orderAll[index].Start + "(尾号" + orderAll[index].Mobile.substr(7) + ")";
+							document.getElementsByClassName('play')[0].innerHTML = "已接到乘客";
+							document.getElementsByTagName("img")[0].style.display = "block";
+							}
+							
+						}
+						
+						//加载地图
+						var footer = $api.byId('footer');
+						$api.fixIos7Bar(footer);
+						var footerPos = $api.offset(footer);
+						map.open({
+							rect : {
+								x : 0,
+								y : 76,
+								w : 'auto',
+								h : api.frameHeight - footerPos.h - 76
+							},
+							center : {
+								lon : 116.4021310000,
+								lat : 39.9994480000
+							},
+							zoomLevel : 13,
+							showUserLocation : true,
+							fixedOn : api.frameName,
+							fixed : true
+						}, function(ret) {
+							if (ret.status) {
+								//alert('地图打开成功');
+							}
+						});
+						//显示司机当前位置
+						map.showUserLocation({
+							isShow : true,
+							trackingMode : 'none'
+						});
+					} else {
+					}
+				}
+			});
+			//监听
+			api.addEventListener({
+				name : 'MNNavigationMenu'
+			}, function(ret, err) {
+				MNNavigationMenu.show();
+			});
+			/*
+			api.addEventListener({
+				name : 'router'
+			}, function(ret, err) {
+			if(api.appInstalled({sync:true,appBundle:'com.baidu.BaiduMap'})){
+				var lonPassenger = null;
+						var latPassenger = null;
+						var wxLon = null;
+						var wxLat = null;
+						if (orderAll[index].Status == 3) {
+							wxLon = orderAll[index].Elng;
+							wxLat = orderAll[index].Elat;
+						} else {
+							wxLon = orderAll[index].Slng;
+							wxLat = orderAll[index].Slat;
+						}
+				 var map = api.require('bMap');
+							map.transCoords({
+							type : "common",
+							lon : wxLon,
+							lat : wxLat,
+							mcode : '0B:07:B0:15:A7:37:E7:FD:B8:78:F6:A1:06:FC:75:44:A4:8A:A7:B4;com.dududache.xmb'
+						}, function(ret, err) {
+							var lonPassenger = ret.lon;
+							var latPassenger = ret.lat;
+							var loc = latPassenger+','+ lonPassenger;
+							window.location.href = 'bdapp://map/navi?location='+loc;
+							
+						});
+						}
+						else{
+                alert('未安装百度地图');
+               }
+			});
+			*/
+			api.addEventListener({
+				name : 'router'
+			}, function(ret, err) {
+				map.setZoomLevel({
+					level : 11
+				});
+				map.getLocation({
+					accuracy : '10m',
+					autoStop : false,
+					filter : 20
+				}, function(ret, err) {
+					if (ret.status) {//获取司机位置返回成功
+						lon = ret.lon;
+						lat = ret.lat;
+						var lonPassenger = null;
+						var latPassenger = null;
+						var wxLon = null;
+						var wxLat = null;
+						if (orderAll[index].Status == 3) {
+							wxLon = orderAll[index].Elng;
+							wxLat = orderAll[index].Elat;
+						} else {
+							wxLon = orderAll[index].Slng;
+							wxLat = orderAll[index].Slat;
+						}
+						if (router == false)//判断是否已经规划过路线
+						{
+							router = true;
+							map.transCoords({
+								type : "common",
+								lon : wxLon,
+								lat : wxLat,
+								mcode : '0B:07:B0:15:A7:37:E7:FD:B8:78:F6:A1:06:FC:75:44:A4:8A:A7:B4;com.dududache.xmb'
+							}, function(ret, err) {
+								lonPassenger = ret.lon;
+								latPassenger = ret.lat;
+								//规划路线
+								routerid = index + 1;
+								map.searchRoute({
+									id : routerid,
+									type : 'drive',
+									policy : 'ecar_fee_first',
+									start : {
+										lon : lon,
+										lat : lat
+									},
+									end : {
+										lon : lonPassenger, //乘客位置精
+										lat : latPassenger
+									}
+								}, function(ret, err) {
+									if (ret.status) {
+										//将规划的路线绘制到地图上
+										map.drawRoute({
+											id : routerid,
+											autoresizing : false,
+											index : 0,
+											styles : {
+												start : {
+													icon : 'widget://image/bmap_start.png'
+												},
+												end : {
+													icon : 'widget://image/bmap_end.png'
+												}
+											}
+										}, function(ret) {
+										/*
+											api.alert({
+												msg : JSON.stringify(ret)
+											});
+											*/
+										});
+										//停止定位
+									} else {
+										router = false;
+										/*api.toast({
+										 msg : '规划路线失败code' + err.code,
+										 duration : 2000,
+										 location : 'bottom'
+										 });
+										 */
+									}
+								});
+							});
+						}
+					} else {
+						api.toast({
+							msg : '获取司机位置失败code:' + err.code,
+							duration : 2000,
+							location : 'bottom'
+						});
+					}
+				});
+			});
+		};
+	</script>
+</html>

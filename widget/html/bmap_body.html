@@ -1,0 +1,904 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="gasoon.com" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>地图导航</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<style>
+			body {
+				height: 100%;
+			}
+			.br {
+				border-right: 1px solid #A5A5A5;
+			}
+			.bl {
+				border-right: 1px solid #232323;
+			}
+			/* 上部效果 */
+			.play-up {
+				position: relative;
+				height: 488px;
+			}
+			.userinfo {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				display: -webkit-box;
+				background-color: #FFFFFF;/*padding: 10px 0;*/
+			}
+			.userinfo .userinfocol {
+				-webkit-box-flex: 1;
+				text-align: center;
+				width: 50px;
+				height: 50px;
+			}
+			.userinfo .userinfocol .info {
+				font-size: 0.7em;
+				color: #3A9DD3;
+				padding-bottom: 5px;
+			}
+			.userinfo .userinfocol .num {
+				padding-top: 5px;
+				font-weight: bold;
+				color: #3A9DD3;
+			}
+			/* 底部控制 */
+			.play-control {
+				position: absolute;
+				width: 100%;
+				bottom: 0;
+				height: 60px;
+			}
+			.play-control .loopmode {
+				position: absolute;
+				left: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .controllist {
+				position: absolute;
+				right: 0;
+				width: 30px;
+				padding: 15px;
+				vertical-align: top
+			}
+			.play-control .play-control-bar {
+				position: absolute;
+				left: 60px;
+				right: 60px;
+				height: 60px;
+			}
+			.play-control .play-control-bar img {
+				width: 50px;
+				padding-top: 5px;
+				position: absolute;
+			}
+			.play-control .play-control-bar .play-control-bar-bg {
+				height: 40px;
+				margin-top: 10px;
+				background-color: #D43C33;
+				border-radius: 20px;
+				width: 90%;
+			}
+			.play-control .play-control-bar-bg .play {
+				text-align: center;
+				line-height: 40px;
+				color: #fff;
+				font-size: 20px;
+				height: 40px;
+			}
+			.hidden {
+				display: none;
+			}
+			.show {
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="play-up" id ="lt">
+			<div class="userinfo play-up-toolbar ">
+				<div class="userinfocol01 userinfocol br">
+					<div class="num" id="mileage"></div>
+					<div class="info">
+						里程
+					</div>
+				</div>
+				<div class="userinfocol02 userinfocol">
+					<div class="num" id="fare">
+						0秒
+					</div>
+					<div class="info">
+						用时
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="play-control" id="footer">
+			<img src="../image/musicplay/icon_telephone.png" alt="" class="controllist" data-tel="" id="tel"  onclick="Call(this)">
+			<div class="play-control-bar" data-click="0" id ="startTravel" onclick="startTravel(this)">
+				<div class="play-control-bar-bg">
+					<div class="play">
+						已接到乘客
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		//增加导航计费采用乘客上车起点和终点之间规划路线来计算费用和实时计费比较取高值
+		//标识：nav
+		//订单变量
+		//监控的公里数
+		var siteUrl = '';
+		var milTest = 0;
+		var mobile = null;
+		var timeC = 0;
+		var bTracCode = null;
+		var longetOn;
+		var latgetOn;
+		var distanceTrace = 0;
+		if ($api.getStorage('time')) {
+			var time = {};
+			time = $api.getStorage('time');
+			timeC = parseInt(time.timeC) + (Date.parse(new Date()) / 1000 - time.stamp);
+		}
+		var timeIndex;
+		var startT = 0;
+		window.onload = function() {
+			var playbg = document.getElementsByClassName('play-up')[0];
+			playbg.style.height = document.documentElement.clientHeight - 60 + 'px';
+			//playbg.style.width = document.documentElement.clientWidth + 'px';
+			timeIndex = setInterval("timedCount()", 1000);
+			// 计时 接到乘客所用的时间
+			setInterval("getDistance()", 4000);
+			//获取鹰眼数据
+		}
+		function timedCount() {
+			timeC = timeC + 1;
+			var time = {};
+			time.timeC = timeC;
+			time.stamp = Date.parse(new Date()) / 1000;
+			$api.setStorage('time', time);
+			//记录轨迹
+			if (bTracCode < 12003) {
+				//百度鹰眼追踪
+				var bTrace = api.require('bTrace');
+				var entityName = $api.getStorage('phone');
+					bTrace.initTrace({
+					    serviceId: 208915,
+					    entityName: entityName,
+					}, function(ret) {
+					    if (ret) {
+					        bTracCode = ret.code;
+					     // alert(JSON.stringify(ret));
+						    bTrace.setInterval({
+						    gatherInterval: 3,
+						    packInterval: 6,
+							})
+					    }
+					});
+					bTrace.startTrace();
+					bTrace.startGather();
+			}
+			//
+			if (startT == 1)
+				return 0;
+			if (timeC >= 60) {
+				var minute = parseInt(timeC / 60);
+				var second = timeC % 60;
+				if (second < 10)
+					second = '0' + second;
+				var timeHtml = minute + '分' + second + '秒';
+			} else {
+				var timeHtml = timeC + '秒';
+			}
+			document.getElementsByClassName('num')[1].innerHTML = timeHtml;
+		}
+
+		function startTravel(button) {
+			var dataClick = button.getAttribute("data-click");
+			if (dataClick == 1) {//已经接到乘客
+				var mil = $api.byId('mileage');
+				var far = $api.byId('fare');
+				var milValue = $api.html(mil);
+				var farValue = $api.html(far);
+				//卫星计费
+				var gpsprice = $api.getStorage('gpsprice');
+				var oidNum = $api.getStorage('oid');
+				var didNum = $api.getStorage('did');
+				if (gpsprice == 1) {
+					gather(milValue, farValue, oidNum, didNum);
+				} else {
+					gatherT(milValue, farValue, oidNum, didNum);
+				}
+				//计费结束
+			} else {
+				api.confirm({
+					title : '乘车上车状态',
+					msg : '确定乘客已上车？',
+					buttons : ['取消','确定']
+				}, function(ret, err) {
+					if (ret.buttonIndex == 2) {
+						var tfar = $api.byId('fare');
+						var timeValue = $api.html(tfar);		
+						//更新服务器
+						var oidNum = $api.getStorage('oid');
+						api.ajax({
+							url : siteUrl,
+							method : 'post',
+							timeout : 30,
+							dataType : 'json',
+							returnAll : false,
+							data : {
+								values : {
+									oid : oidNum,
+									usetime : timeValue,
+									op : 8
+								}
+							}
+						}, function(ret, err) {
+							if (ret) {
+								startT = 1;
+								api.sendEvent({
+									name : 'startT'
+								});
+								$api.setStorage('arrive', 2);
+								//$api.rmStorage('time');
+								$api.rmStorage('distance');
+								button.setAttribute("data-click", 1);
+								document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+								var img = document.getElementsByTagName("img");
+								//clearInterval(timeIndex);
+								timeC = 0;
+								document.getElementById('footer').removeChild(img[0]);
+								document.getElementsByClassName('num')[0].innerHTML = "0.0";
+								document.getElementsByClassName('info')[0].innerHTML = "里程";
+								document.getElementsByClassName('num')[1].innerHTML = "0";
+								document.getElementsByClassName('info')[1].innerHTML = "费用";
+							} else {
+								alert('网络连接失败！');
+							}
+						});
+					}
+				});
+			}
+		}
+
+		function Call(button) {
+			//alert(mobile);
+			api.call({
+				type : 'tel_prompt',
+				number : mobile
+			});
+		}
+
+		//获取鹰眼计费
+		function getDistance() {
+			var startmetre = parseFloat($api.getStorage('startmetre'));
+			//起步公里
+			var startprice = parseFloat($api.getStorage('startprice'));
+			//起步价
+			var middleprice = parseFloat($api.getStorage('middleprice'));
+			//中间价格
+			var moremetre = parseFloat($api.getStorage('moremetre'));
+			//远程公里，如超出10公里，计费标准
+			var moreprice = parseFloat($api.getStorage('moreprice'));
+			//超出后计费
+			//夜间价格
+			var yts = $api.getStorage('ytimes');
+			var yte = $api.getStorage('ytimee');
+			var h = new Date().getHours();
+			if (h >= yts || h <= yte) {
+				var startmetre = parseFloat($api.getStorage('ystartmetre'));
+				//起步公里
+				var startprice = parseFloat($api.getStorage('ystartprice'));
+				//起步价
+				var middleprice = parseFloat($api.getStorage('ymiddleprice'));
+				//中间价格
+				var moremetre = parseFloat($api.getStorage('ymoremetre'));
+				//远程公里，如超出10公里，计费标准
+				var moreprice = parseFloat($api.getStorage('ymoreprice'));
+			}
+			//时间计费
+			var timecharge = parseFloat($api.getStorage('timecharge'));
+			if (startT) {
+				var bTrace = api.require('bTrace');
+				var entityName = $api.getStorage('phone');
+					bTrace.queryDistance({
+						serviceId:208902,
+						entityName:entityName,
+						startTime:'1548057076',
+						endTime:'1548057276',
+						transportMode:'driving'
+					},function(ret) {
+							if (ret) {
+								distanceTrace = parseFloat(ret.distance);
+									var sTrace = (distanceTrace / 1000).toFixed(1);
+									var feeTrace = 0;
+									if (sTrace <= startmetre)
+										feeTrace = startprice;
+									else if (sTrace > startmetre && sTrace <= moremetre)
+										feeTrace = (startprice + (sTrace - startmetre) * middleprice).toFixed(1);
+									else if (sTrace > moremetre)
+										feeTrace = (startprice + (moremetre - startmetre) * middleprice + (sTrace - moremetre) * moreprice).toFixed(1);//增加时间计费
+										var feetTrace = parseFloat(timecharge * parseInt(timeC / 60)).toFixed(1);
+										feeTrace = parseFloat(Number(feeTrace) + Number(feetTrace)).toFixed(1);
+										var mil = $api.byId('mileage');
+										var far = $api.byId('fare');
+										if(distanceTrace != 0){
+										$api.html(mil, sTrace);
+										$api.html(far, feeTrace);
+										}
+							}
+					})
+			}
+		}
+
+		function gather(milValue, farValue, oidNum, didNum) {//收款方式
+			var gatherType = $api.getStorage('gathertype');
+			var money = farValue;
+			var mil = milValue;
+			if (gatherType == 0) {//微信支付
+				var buttonStyle = [{
+					marginB : 25,
+					marginL : 25,
+					w : 250,
+					h : 35,
+					bg : '#04BE02',
+					color : '#fff',
+					size : 18
+				}];
+				var buttonText = [{
+					text : '微信收款'
+				}];
+			} else if (gatherType == 1) {//现金支付
+				var buttonStyle = [{
+					marginB : 25,
+					marginL : 25,
+					w : 250,
+					h : 35,
+					bg : 'F8F8F8',
+					color : '#4C4C4F',
+					size : 18
+				}];
+				var buttonText = [{
+					text : '现金收款'
+				}];
+			} else {//微信支付+现金支付
+				var buttonStyle = [{
+					marginB : 25,
+					marginL : 30,
+					w : 240,
+					h : 35,
+					bg : '#ED1C43',
+					color : '#fff',
+					size : 18
+				}, {
+					marginB : 25,
+					marginL : 30,
+					w : 240,
+					h : 35,
+					bg : '#F8F8F8',
+					color : '#4C4C4F',
+					size : 18
+				}];
+				var buttonText = [{
+					text : '微信收款'
+				}, {
+					text : '现金收款'
+				}];
+			}
+			var dialogBox = api.require('dialogBox');
+			dialogBox.evaluation({
+				styles : {
+					bg : '#fff',
+					w : 300,
+					title : {
+						marginT : 20,
+						size : 20,
+						color : '#000',
+						bold : true
+					},
+					content : {
+						marginT : 20,
+						color : '#111',
+						size : 18
+					},
+					buttons : buttonStyle
+				},
+				texts : {
+					title : '收款方式',
+					content : '本次行程车费共：' + money + '元(' + mil + '公里)',
+					buttons : buttonText
+				},
+				tapClose : true
+			}, function(ret, err) {
+				if (ret) {
+					var payType = 0;
+					//默认微信支付
+					if (ret.index == 0) {//微信支付
+						payType = gatherType;
+						dialogBox.close({
+							dialogName : 'evaluation'
+						});
+					}
+					if (ret.index == 1) {//现金支付
+						payType = 1;
+						dialogBox.close({
+							dialogName : 'evaluation'
+						});
+					}
+					//提交车费等数据到服务器
+					api.ajax({
+						url : siteUrl,
+						method : 'post',
+						timeout : 30,
+						dataType : 'json',
+						returnAll : false,
+						data : {
+							values : {
+								oid : oidNum,
+								mileage : milValue,
+								fee : farValue,
+								tprice : 0,
+								did : didNum,
+								gathertype : payType,
+								op : 5
+							}
+						}
+					}, function(ret, err) {
+						if (ret) {
+							//
+							dialogBox.close({
+								dialogName : 'alert'
+							});
+							//关闭鹰眼
+							var bTrace = api.require('bTrace');
+							var entityName = $api.getStorage('phone');
+							bTrace.stopTrace({
+								entityName : entityName
+							}, function(ret, err) {
+								if (ret) {
+									//alert(JSON.stringify(ret));
+								}
+							});
+							$api.rmStorage('arrive');
+							$api.rmStorage('distance');
+							$api.rmStorage('oid');
+							$api.rmStorage('opType');
+							api.closeWin({
+								type : 'flip',
+								subType : 'from_bottom',
+								duration : 500
+							});
+						} else {
+							alert(JSON.stringify(err));
+						}
+					});
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+		}
+
+		function gatherT(milValue, farValue, oidNum, didNum) {//计价器计费收款方式
+			var gatherType = $api.getStorage('gathertype');
+			if (gatherType == 0) {//微信支付
+				 var leftW = 0;
+				 var rightW = 220;
+			} else if (gatherType == 1) {//现金支付
+				var leftW = 260;
+				 var rightW = 0;
+			} else {//微信支付+现金支付
+				 var leftW = 120;
+				 var rightW = 120;
+			}
+			var dialogBox = api.require('dialogBox');
+			dialogBox.sendMessage({
+				texts : {
+					title : '行程车费：',
+					hintText : '',
+					content : '请输入本次行程乘车费用',
+					leftBtnTitle : '现金收款',
+					rightBtnTitle : '微信收款'
+				},
+				styles : {
+					bg : '#fff',
+					corner : 4,
+					w : 280,
+					title : {
+						h : 40,
+						show : {
+							marginL : 6,
+							titleSize : 16,
+							titleColor : '#4B4B4B'
+						},
+						input : {
+							marginL : 6,
+							textSize : 15,
+							textColor : '#4B4B4B'
+						}
+					},
+					content : {
+						color : '#4B4B4B',
+						size : 15
+					},
+					left : {
+						marginB : 7,
+						marginL : 10,
+						w : leftW,
+						h : 35,
+						corner : 2,
+						bg : '#f8f8f8',
+						color : '#000',
+						size : 18
+					},
+					right : {
+						marginB : 7,
+						marginL : 20,
+						w : rightW,
+						h : 35,
+						corner : 2,
+						bg : '#05a0f5',
+						color : '#fff',
+						size : 18
+					}
+				},
+				tapClose:true
+			}, function(ret) {
+				if (ret.text == '')
+					return false;
+				if (isNaN(ret.text)) {
+					api.toast({
+						msg : '输入金额有误，请重新输入！',
+						duration : 2000,
+						location : 'bottom'
+					});
+					return false;
+				}
+				var payType = 0;
+				//默认微信支付
+				if (ret.eventType == 'left') {//现金收款
+					payType = 1;
+				}
+				if (ret.eventType == 'right') {//微信收款
+					payType = 0;
+				}
+				api.ajax({
+					url : siteUrl,
+					method : 'post',
+					timeout : 30,
+					dataType : 'json',
+					returnAll : false,
+					data : {
+						values : {
+							oid : oidNum,
+							mileage : milValue,
+							fee : farValue,
+							tprice : ret.text,
+							did : didNum,
+							gathertype : payType,
+							op : 5
+						}
+					}
+				}, function(ret, err) {
+					if (ret) {
+						//
+						var dialogBox = api.require('dialogBox');
+						dialogBox.close({
+							dialogName : 'sendMessage'
+						});
+						//关闭鹰眼
+						var bTrace = api.require('bTrace');
+						var entityName = $api.getStorage('phone');
+						bTrace.stopTrace({
+							entityName : entityName
+						}, function(ret, err) {
+							if (ret) {
+								//alert(JSON.stringify(ret));
+							}
+						});
+						clearInterval(timeIndex);
+						$api.rmStorage('arrive');
+						$api.rmStorage('distance');
+						$api.rmStorage('time');
+						$api.rmStorage('oid');
+						$api.rmStorage('opType');
+						api.closeWin({
+							type : 'flip',
+							subType : 'from_bottom',
+							duration : 500
+						});
+					} else {
+						alert(JSON.stringify(err));
+					}
+				});
+			});
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var router = false;
+			var startSuccess = false;
+			var startLon;
+			var startLat;
+			var startTimestamp;
+			var timestamp;
+			var footer = $api.byId('footer');
+			$api.fixIos7Bar(footer);
+			var footerPos = $api.offset(footer);
+			var map = api.require('bMap');
+			var lon = 117.2954330000;
+			var lat = 40.0878530000;
+			var lonPassenger = null;
+			var latPassenger = null;
+			$api.setStorage('arrive', 1);
+			//查询订单
+			var oid = $api.getStorage('oid');
+			var db = api.require('db');
+			var sql = "select * from Data where id='" + oid + "';";
+			db.selectSql({
+				name : 'order',
+				sql : sql
+			}, function(ret, err) {
+				if (ret.status) {
+					var data = ret.data;
+					mobile = data[0].Mobile;
+					document.getElementsByClassName('num')[0].innerHTML = data[0].Mobile;
+					document.getElementsByClassName('info')[0].innerHTML = data[0].Address;
+					//页面被异常关闭，恢复之前数据
+					if ($api.getStorage('from') == 2) {
+						$api.rmStorage('from');
+						startT = 1;
+						var tfar = $api.byId('fare');
+						var timeValue = $api.html(tfar);
+						$api.setStorage('arrive', 2);
+						document.getElementById('startTravel').setAttribute("data-click", 1);
+						document.getElementsByClassName('play')[0].innerHTML = "结束行程";
+						var img = document.getElementsByTagName("img");
+						//clearInterval(timeIndex);
+						document.getElementById('footer').removeChild(img[0]);
+						document.getElementsByClassName('num')[0].innerHTML = "0.0";
+						document.getElementsByClassName('info')[0].innerHTML = "里程";
+						document.getElementsByClassName('num')[1].innerHTML = "0";
+						document.getElementsByClassName('info')[1].innerHTML = "费用";
+					}
+					//end
+					if (data[0].Locationy != 0 && data[0].Locationx != 0) {
+						map.transCoords({
+							type : "common",
+							lon : data[0].Locationy,
+							lat : data[0].Locationx,
+							mcode : '0B:07:B0:15:A7:37:E7:FD:B8:78:F6:A1:06:FC:75:44:A4:8A:A7:B4;com.dududache.xmb'
+						}, function(ret, err) {
+							lonPassenger = ret.lon;
+							latPassenger = ret.lat;
+						});
+					}
+				} else {
+					api.alert({
+						msg : err.msg
+					});
+				}
+			});
+			var playbg = document.getElementsByClassName('play-up')[0];
+			playbg.style.height = api.pageParam.height - 60 + 'px';
+			map.open({//打开百度地图
+				rect : {
+					x : 0,
+					y : 0,
+					w : api.winWidth,
+					h : api.pageParam.height - footerPos.h - 70
+				},
+				center : {
+					lon : 116.4021310000,
+					lat : 39.9994480000
+				},
+				zoomLevel : 15,
+				showUserLocation : true,
+				fixedOn : 'bmap_body',
+				fixed : true
+			}, function(ret) {
+				if (ret.status) {
+					//alert('地图打开成功');
+				}
+			});
+			//获取司机当前位置
+			map.getLocation({
+				accuracy : '10m',
+				autoStop : false,
+				filter : 20
+			}, function(ret, err) {
+				if (ret.status) {//获取司机位置返回成功
+					lon = ret.lon;
+					lat = ret.lat;
+					if (router == false)//判断是否已经规划过路线
+					{
+						//规划路线
+						map.searchRoute({
+							id : 1,
+							type : 'drive',
+							policy : 'ecar_fee_first',
+							start : {
+								lon : lon,
+								lat : lat
+							},
+							end : {
+								lon : lonPassenger, //乘客位置精
+								lat : latPassenger
+							}
+						}, function(ret, err) {
+							if (ret.status) {
+								router = true;
+								//将规划的路线绘制到地图上
+								map.drawRoute({
+									id : 1,
+									autoresizing : false,
+									index : 0,
+									styles : {
+										start : {
+											icon : 'widget://image/bmap_start.png'
+										},
+										end : {
+											icon : 'widget://image/bmap_end.png'
+										}
+									}
+								}, function(ret) {
+									api.alert({
+										msg : JSON.stringify(ret)
+									});
+								});
+							} else {
+								/*api.toast({
+								 msg : '规划路线失败code' + err.code,
+								 duration : 2000,
+								 location : 'bottom'
+								 });*/
+							}
+						});
+					}
+					//当状态为已经接到乘客时，计算里程和车费
+					if (startT) {
+						//navs
+						longetOn = lon;
+						latgetOn = lat;
+						//nave
+						map.removeRoute({
+							ids : [1] //删除导航路线图
+						});
+						map.stopLocation();
+						//关闭定位，从新设置新的定位模式
+						//初始化起点
+						var s = 0;
+						//km
+						var fee = 0;
+						//车费
+						var distance = 0;
+						if ($api.getStorage('distance')) {
+							distance = parseFloat($api.getStorage('distance'));
+						}
+						//alert("公里数："+distance);
+						//m
+						var startmetre = parseFloat($api.getStorage('startmetre'));
+						//起步公里
+						var startprice = parseFloat($api.getStorage('startprice'));
+						//起步价
+						var middleprice = parseFloat($api.getStorage('middleprice'));
+						//中间价格
+						var moremetre = parseFloat($api.getStorage('moremetre'));
+						//远程公里，如超出10公里，计费标准
+						var moreprice = parseFloat($api.getStorage('moreprice'));
+						//超出后计费
+						//夜间价格
+						var yts = $api.getStorage('ytimes');
+						var yte = $api.getStorage('ytimee');
+						var h = new Date().getHours();
+						if (h >= yts || h <= yte) {
+							var startmetre = parseFloat($api.getStorage('ystartmetre'));
+							//起步公里
+							var startprice = parseFloat($api.getStorage('ystartprice'));
+							//起步价
+							var middleprice = parseFloat($api.getStorage('ymiddleprice'));
+							//中间价格
+							var moremetre = parseFloat($api.getStorage('ymoremetre'));
+							//远程公里，如超出10公里，计费标准
+							var moreprice = parseFloat($api.getStorage('ymoreprice'));
+						}
+						//时间计费
+						var timecharge = parseFloat($api.getStorage('timecharge'));
+						//alert(JSON.stringify(ret));
+						map.getLocation({
+							accuracy : '10m',
+							autoStop : false,
+							filter : 5
+						}, function(ret, err) {
+							if (ret.status) {
+								lon = ret.lon;
+								lat = ret.lat;
+								timestamp = ret.timestamp;
+								if (startSuccess == false) {
+									startLon = lon;
+									startLat = lat;
+									startTimestamp = timestamp;
+									startSuccess = true;
+								}
+								//alert(JSON.stringify(ret));
+								//计算距离
+								map.getDistance({
+									start : {
+										lon : startLon,
+										lat : startLat
+									},
+									end : {
+										lon : lon,
+										lat : lat
+									}
+								}, function(ret) {
+									if (ret.status) {
+										startLon = lon;
+										startLat = lat;
+										var dTime = timestamp - startTimestamp;
+										startTimestamp = timestamp;
+										//更新里程和费用
+										dTime = dTime / 1000;
+										var mph = ret.distance / dTime;
+										//时速
+										if (mph < 40) {
+											distance = distance + ret.distance;
+										}
+										$api.setStorage('distance', distance);
+										s = (distance / 1000).toFixed(1);
+										//s = Math.ceil(s);//向上取整
+										if (s <= startmetre)
+											fee = startprice;
+										else if (s > startmetre && s <= moremetre)
+											fee = (startprice + (s - startmetre) * middleprice).toFixed(1);
+										else if (s > moremetre)
+											fee = (startprice + (moremetre - startmetre) * middleprice + (s - moremetre) * moreprice).toFixed(1);
+										//增加时间计费
+										var feet = parseFloat(timecharge * parseInt(timeC / 60)).toFixed(1);
+										fee = parseFloat(Number(fee) + Number(feet)).toFixed(1);
+										var mil = $api.byId('mileage');
+										var far = $api.byId('fare');
+										//var milFloat = parseFloat(mil);
+										if (distanceTrace == 0) {
+											$api.html(mil, s);
+											$api.html(far, fee);
+										}
+									}
+								});
+							} else {
+								api.toast({
+									msg : '获取司机位置失败code:' + err.code,
+									duration : 2000,
+									location : 'bottom'
+								});
+							}
+						});
+					}
+					//end
+				} else {
+					api.toast({
+						msg : '获取司机位置失败code:' + err.code,
+						duration : 2000,
+						location : 'bottom'
+					});
+				}
+			});
+			//显示司机当前位置
+			map.showUserLocation({
+				isShow : true,
+				trackingMode : 'follow'
+			});
+		}
+	</script>
+</html>

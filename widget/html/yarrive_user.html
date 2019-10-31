@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>拼车订单</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/egret.css" />
+		<style>
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+				height: 50px;
+			}
+			.egret-header-title .musicname {
+				color: #fff;
+				font-size: 18px;
+			}
+			.egret-header-title .concel {
+				position: absolute;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 12px;
+				height: 50px;
+				right: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 第二头部 -->
+		<div id="secHeader" class="titlebar">
+			<div class="egret-header topbar">
+				<div class="egret-header-title">
+					<div class="concel" onclick=""></div>
+					<div class="musicname">
+						接客途中
+					</div>
+				</div>
+				<!--div  class="egret-img"><img src="../image/cm2_icn_back.png" alt="" onclick="goback()" ></div-->
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		var siteUrl = '';
+		var isbmapOpen = false;
+		function goback() {
+			api.closeWin({
+				name : 'arrive_user'
+			});
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var header = $api.byId('secHeader');
+			$api.fixIos7Bar(header);
+			var headerPos = $api.offset(header);
+			api.openFrame({
+				name : 'pbmap_body',
+				url : './pbmap_body.html',
+				pageParam : api.pageParam,
+				bounces : false,
+				opaque : false,
+				rect : {
+					x : 0,
+					y : headerPos.h,
+					w : 'auto',
+					h : 'auto'
+				}
+			});
+			//监听回退键
+			api.addEventListener({
+				name : 'keyback'
+			}, function(ret, err) {
+				//operation
+			});
+			//监听网络
+			api.addEventListener({
+				name : 'offline'
+			}, function(ret, err) {
+				//operation
+				api.toast({
+					msg : '网络错误,请检查网络设置',
+					duration : 2000,
+					location : 'bottom'
+				});
+			});
+			//监听gps事件
+			var gpsmodel = api.require('gpsState');
+			gpsmodel.gpsstate(function(ret) {
+				if (ret.gps == false) {
+					gpsmodel.opengps();
+				}
+			});
+			//禁止屏幕休眠
+			api.setKeepScreenOn({
+				keepOn : true
+			});
+		}
+	</script>
+</html>

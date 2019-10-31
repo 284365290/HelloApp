@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <style>
+    	body{
+    		
+    	}
+    </style>
+</head>
+<body>
+	<div id="secHeader" class="titlebar">
+			<div class="egret-header topbar">
+				<div class="egret-header-title">
+					<div class="concel">
+						导航
+					</div>
+					<div class="musicname" onclick="nav()">
+						切换乘客 <span><img src="../../image/cm2_icn_down.png" width="17" height="17" alt="" ></span>
+					</div>
+				</div>
+				<div  class="egret-img"><img src="../../image/cm2_icn_back.png" alt="" onclick="goback()" ></div>
+			</div>
+		</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+function nav(){
+var dialogBox = api.require('dialogBox');
+dialogBox.alert({
+    texts: {
+        title: '提示',
+        content: '送你一个超级礼包，内有超值福利，先到先得，点击领取 >>',
+        leftBtnTitle: '再看看',
+        rightBtnTitle: '确定接单'
+    },
+    styles: {
+        bg: '#fff',
+        w: 300,
+        title: {
+            marginT: 20,
+            icon: 'widget://res/gou.png',
+            iconSize: 40,
+            titleSize: 16,
+            titleColor: '#000'
+        },
+        content: {
+            color: '#3f3a3a',
+            size: 16
+        },
+        left: {
+            marginB: 7,
+            marginL: 20,
+            w: 130,
+            h: 35,
+            corner: 2,
+            bg: '#fff',
+            color: '#615a5a',
+            size: 18
+        },
+        right: {
+            marginB: 7,
+            marginL: 10,
+            w: 130,
+            h: 35,
+            corner: 2,
+            bg: '#fff',
+            color: '#05a0f5',
+            size: 18
+        }
+    }
+}, function(ret) {
+    if (ret.eventType == 'left') {
+        var dialogBox = api.require('dialogBox');
+        dialogBox.close({
+            dialogName: 'alert'
+        });
+    }
+});
+
+}
+	apiready = function(){
+		var dialogBox = api.require('dialogBox');
+dialogBox.evaluation({
+    styles: {
+        bg: '#fff',
+        w: 300,
+        corner: 2,
+        title: {
+            marginT: 20,
+            size: 16,
+            color: '#000',
+            bold: true
+        },
+        content: {
+            marginT: 20,
+            color: '#111',
+            size: 15
+        },
+        buttons: [{
+            marginB: 20,
+            marginL: 0,
+            w: 300,
+            h: 35,
+            bg: '#228B22',
+            color: '#fff',
+            size: 18
+        }, {
+            marginB:20,
+            marginL: 0,
+            w: 300,
+            h: 35,
+            bg: '#EDEDED',
+            color: '#007FFF',
+            size: 18
+        }]
+    },
+    tapClose:true,
+    texts: {
+        title: '收款方式',
+        content: '请根据乘客要求选择收款方式',
+        buttons: [{
+            text: '微信收款'
+        }, {
+            text: '现金收款'
+        }]
+    }
+}, function(ret, err) {
+    if (ret) {
+        alert(JSON.stringify(ret));
+    } else {
+        alert(JSON.stringify(err));
+    }
+});
+	}
+</script>
+</html>

@@ -1,0 +1,252 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>实时订单</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../../css/egret.css" />
+		<style>
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+				height: 50px;
+			}
+			.egret-header-title .musicname {
+				color: #fff;
+				font-size: 18px;
+			}
+			.egret-header-title .concel {
+				position: absolute;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 12px;
+				height: 50px;
+				right: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 第二头部 -->
+		<div id="secHeader" class="titlebar">
+			<div class="egret-header topbar">
+				<div class="egret-header-title">
+					<div class="concel" onclick="router()">
+						规划路线
+					</div>
+					<!--div class="musicname" onclick="nav()">
+						切换乘客 <span><img src="../../image/cm2_icn_down.png" width="17" height="17" alt="" ></span>
+					</div-->
+				</div>
+				<div  class="egret-img"><img src="../../image/cm2_icn_back.png" alt="" onclick="goback()" >
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+		var isbmapOpen = false;
+		var siteUrl = '';
+		function goback() {
+			api.closeWin({
+				name : 'yarrive_user'
+			});
+		}
+
+		function concel() {
+			var arriveStatus = $api.getStorage('arrive');
+			if (arriveStatus == 2) {
+				api.toast({
+					msg : '您已接到乘客，无法取消订单',
+					duration : 2000,
+					location : 'bottom'
+				});
+			} else {
+				var dialogBox = api.require('dialogBox');
+				dialogBox.raffle({
+					texts : {
+						title : '乘客正在焦急等待~',
+						mainText : '司机不可单方取消订单，以下原因方可取消',
+						subText : '1.乘客电话打不通或不接，联系不上乘客\n2.遇到堵车，乘客着急，不愿等待          \n3.车辆临时故障，与乘客沟通后，乘客   \n同意取消                                           ',
+						leftTitle : '去接乘客',
+						rightTitle : '继续取消'
+					},
+					styles : {
+						bg : '#fff',
+						w : 300,
+						corner : 10,
+						title : {
+							size : 15,
+							color : '#000'
+						},
+						icon : {
+							marginT : 20,
+							w : 40,
+							h : 40,
+							iconPath : 'widget://image/common_icn_information.png'
+						},
+						main : {
+							marginT : 20,
+							color : '#636363',
+							size : 14
+						},
+						sub : {
+							marginT : 8,
+							color : '#999999',
+							size : 15
+						},
+						left : {
+							marginB : 7,
+							marginL : 18,
+							w : 130,
+							h : 35,
+							corner : 2,
+							bg : '#fff',
+							color : '#007FFF',
+							size : 16
+						},
+						right : {
+							marginB : 7,
+							marginL : 18,
+							w : 130,
+							h : 35,
+							corner : 2,
+							bg : '#fff',
+							color : '#007FFF',
+							size : 16
+						}
+					},
+					tapClose : true
+				}, function(ret, err) {
+					if (ret) {
+						if (ret.eventType == 'left') {
+							dialogBox.close({
+								dialogName : 'raffle'
+							});
+						}
+						if (ret.eventType == 'right') {
+							//更新订单信息
+							var oidNum = $api.getStorage('oid');
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										oid : oidNum,
+										op : '4'
+									}
+								}
+							}, function(ret, err) {
+								if (ret) {
+									$api.rmStorage('arrive');
+									$api.rmStorage('oid');
+									$api.rmStorage('time');
+									api.closeWin({
+										type : 'flip',
+										subType : 'from_bottom',
+										duration : 500
+									});
+									dialogBox.close({
+										dialogName : 'raffle'
+									});
+									api.toast({
+										msg : '您已取消订单',
+										duration : 2000,
+										location : 'bottom'
+									});
+								} else {
+									alert(JSON.stringify(err));
+								}
+							});
+						}
+					} else {
+						dialogBox.close({
+							dialogName : 'raffle'
+						});
+						api.toast({
+							msg : '无法取消订单，请检查网络',
+							duration : 2000,
+							location : 'bottom'
+						});
+					}
+				});
+			}
+		}
+
+		//切换乘客
+		function nav() {
+			api.sendEvent({
+				name : 'MNNavigationMenu',
+				extra : {
+					key : 'click'
+				}
+			});
+		}
+		//导航
+function router() {
+			api.sendEvent({
+				name : 'router',
+				extra : {
+					key : 'click'
+				}
+			});
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var header = $api.byId('secHeader');
+			$api.fixIos7Bar(header);
+			var headerPos = $api.offset(header);
+			api.openFrame({
+				name : 'ymap_body',
+				url : './ymap_body.html',
+				bounces : false,
+				opaque : false,
+				pageParam : {
+					id : api.pageParam.id
+				},
+				rect : {
+					x : 0,
+					y : headerPos.h,
+					w : 'auto',
+					h : 'auto'
+				}
+			});
+			//监听网络
+			api.addEventListener({
+				name : 'offline'
+			}, function(ret, err) {
+				//operation
+				api.toast({
+					msg : '网络错误,请检查网络设置',
+					duration : 2000,
+					location : 'bottom'
+				});
+			});
+			//监听gps事件
+			var gpsmodel = api.require('gpsState');
+			gpsmodel.gpsstate(function(ret) {
+				if (ret.gps == false) {
+					gpsmodel.opengps();
+				}
+			});
+			//禁止屏幕休眠
+			api.setKeepScreenOn({
+				keepOn : true
+			});
+		}
+	</script>
+</html>

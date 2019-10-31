@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<style>
+			html, body {
+				min-height: 100%;
+				background-color: #f9f9f9;
+			}
+			/* 头部 */
+			.topbar {
+				background: #05a0f5;
+				height: 50px;
+				border-bottom: 1px solid #DDDFE3;
+				position: relative;
+			}
+			.egret-header-box {
+				height: 50px;
+			}
+			.egret-img {
+				position: absolute;
+			}
+			.egret-img img {
+				height: 50px;
+				padding: 10px;
+				vertical-align: top;
+			}
+			.egret-header-search {
+				background-color: #fff;
+				position: absolute;
+				left: 60px;
+				right: 20px;
+				height: 34px;
+				margin-top: 8px;
+				border-radius: 4px;
+			}
+			.egret-header-search img {
+				margin-left: 30px;
+				height: 20px;
+				margin-top: 7px;
+			}
+			.egret-header-search input {
+				line-height: 24px;
+				font-size: 14px;
+				padding-top: 5px;
+			}
+			.egret-header-search input:focus {/*border:0;*/
+				outline: none;
+			}
+			/* 第二头部 */
+			.egret-header-text {
+				line-height: 50px;
+				color: #fff;
+				font-size: 16px;
+				padding: 0 10px;
+			}
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="secHeader" class="titlebar">
+			<div class="aui-content">
+			
+			<div class="aui-content aui-content-padded" id="message-content">
+				 
+			
+				 
+			</div>
+			</div>
+			
+		</div>
+		
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+	var siteUrl = '';
+	apiready = function() {
+		var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+	var activity = api.require('UILoading');
+			activity.keyFrame({
+				rect : {
+					w : 80,
+					h : 100
+				},
+				styles : {
+					bg : 'rgba(0,0,0,0.5)',
+					corner : 5,
+					interval : 50,
+					frame : {
+						w : 80,
+						h : 80
+					}
+				}
+			}, function(ret) {
+				//alert(JSON.stringify(ret));
+			});
+    var uniacidValue = $api.getStorage('uniacid');
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						uniacid : uniacidValue,
+						op : '15'
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+				var dm = $api.byId('message-content');
+				var c1 = '<div class="aui-chat-receiver"><div class="aui-chat-receiver-avatar"><img src="../../image/musicplayshare02.png"></div><div class="aui-chat-receiver-cont"><div class="aui-chat-left-triangle"></div><span>';
+			    var c2 = '</span></div></div>';
+				for (var i = 0; i < ret.length; i++) {
+				    var content = c1+ret[i].content+c2;
+				    $api.append(dm,content);
+				}
+					activity.closeKeyFrame();
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+			}
+	</script>
+</html>

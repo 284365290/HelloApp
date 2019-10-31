@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<style>
+			/* HTML5 display-role reset for older browsers */
+			article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+				display: block;
+			}
+			html, body {
+				min-height: 100%;
+				background-color: #fff;
+				height: 100%;
+			}
+			ol, ul {
+				list-style: none;
+			}
+			blockquote, q {
+				quotes: none;
+			}
+			blockquote:before, blockquote:after, q:before, q:after {
+				content: '';
+				content: none;
+			}
+			table {
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			/* Main CSS */
+			* {
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+			body {
+				font-family: sans-serif;
+				background-color: #fff;
+				/*渐变背景
+				 background-image: -webkit-linear-gradient(bottom, #323B55 0%, #424F71 100%);
+				 background-image: -moz-linear-gradient(bottom, #323B55 0%, #424F71 100%);
+				 background-image: -o-linear-gradient(bottom, #323B55 0%, #424F71 100%);
+				 background-image: -ms-linear-gradient(bottom, #323B55 0%, #424F71 100%);
+				 background-image: linear-gradient(bottom, #323B55 0%, #424F71 100%);
+				 */
+			}
+			.login-main {
+				height: 130px;
+				margin-left: 15px;
+				display: flex;
+				justify-content: center;
+				flex-direction: column;
+			}
+			.login-main .title {
+				font-size: 20px;
+				font-weight: bold;
+			}
+			.login-main .sub-title {
+				font-size: 14px;
+				height: 30px;
+				line-height: 30px;
+				color: #847e7e;
+			}
+			.btn {
+				color: #000000
+			}
+			.laber {
+				color: #000;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="aui-bar aui-bar-nav" style="background-color: #fff;">
+			<a class="aui-pull-left"style="color: #000;"> <span class="aui-iconfont aui-icon-left"style="color: #000;" onclick="goback()"></span> </a>
+			<div class="aui-title"></div>
+		</header>
+		<div class= "login-main">
+			<div class="title">
+				请您输入验证码
+			</div>
+			<div class="sub-title">
+				验证码已经发送到您的手机
+			</div><div class="sub-title" id="sub-tel"></div>
+		</div>
+		<div class="aui-card aui-noborder">
+			<div class="aui-form">
+				<div class="aui-input-row">
+					<span class="aui-input-addon">验证码</span>
+					<input type="hidden"value="" id="tel">
+					<input type="text" autofocus="autofocus" class="aui-input" placeholder="" id="code">
+					<span class="aui-input-addon laber" style="color:#05a0f5;" id="codebt"onclick="sendcode()">59秒</span>
+				</div>
+				<div class="aui-btn-row">
+					<div class="aui-btn aui-btn-block aui-btn-danger"style="padding: 12px 0;" onclick="verifycode()">
+						下一步
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		var siteUrl = '';
+		var count = 59;
+		var intervalId = 0;
+		function goback() {
+			api.closeWin({
+				name : 'verify'
+			});
+		}
+
+		//发送验证码
+		function sendcode() {
+			var tel = $api.getStorage('phone');
+			var uniacid = $api.getStorage('uniacid');
+			if (count <= 1) {
+				api.ajax({
+					url : siteUrl,
+					method : 'post',
+					timeout : 30,
+					dataType : 'json',
+					returnAll : false,
+					data : {
+						values : {
+							tel : tel,
+							uniacid : uniacid,
+							op : '23'
+						}
+					}
+				}, function(ret, err) {
+					if (ret) {
+						if (ret.data == 0) {
+							api.toast({
+								msg : '手机号或区域码不正确',
+								duration : 2000,
+								location : 'bottom'
+							});
+						} else {
+							count = 59;
+							intervalId = setInterval("countDown()", 1000);
+						}
+					} else {
+						alert('网络连接失败！');
+					}
+				});
+			}
+		}
+
+		//验证验证码
+		function verifycode() {
+			var tel = $api.getStorage('phone');
+			var uniacid = $api.getStorage('uniacid');
+			var code = $api.val($api.byId('code'));
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						tel : tel,
+						uniacid : uniacid,
+						code : code,
+						op : '24'
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.data == 0) {
+						api.toast({
+							msg : '验证码不正确',
+							duration : 2000,
+							location : 'bottom'
+						});
+					} else {
+						$api.setStorage('login', 1);
+						$api.setStorage('startmetre', ret.startmetre);
+						$api.setStorage('startprice', ret.startprice);
+						$api.setStorage('middleprice', ret.middleprice);
+						$api.setStorage('moremetre', ret.moremetre);
+						$api.setStorage('moreprice', ret.moreprice);
+						$api.setStorage('gpsprice', ret.gps);
+						$api.setStorage('meiqiakey', ret.kfkey);
+						//夜间价格
+						$api.setStorage('ystartmetre', ret.ystartmetre);
+						$api.setStorage('ystartprice', ret.ystartprice);
+						$api.setStorage('ymiddleprice', ret.ymiddleprice);
+						$api.setStorage('ymoremetre', ret.ymoremetre);
+						$api.setStorage('ymoreprice', ret.ymoreprice);
+						$api.setStorage('ytimes', ret.ytimes);
+						$api.setStorage('ytimee', ret.ytimee);
+						$api.setStorage('timecharge', ret.timecharge);
+						$api.setStorage('gathertype', ret.pay);
+						api.closeToWin({
+							name : 'root',
+							reload : true,
+							delay : 200
+						});
+					}
+				} else {
+					alert('网络连接失败！');
+				}
+			});
+		}
+
+		function countDown() {
+			if (count > 1) {
+				count = count - 1;
+				var str = count + '秒';
+				$api.html($api.byId('codebt'), str);
+				$api.attr($api.byId('codebt'), 'disabled', true);
+			} else {
+				var str = '重新发送';
+				$api.html($api.byId('codebt'), str);
+				$api.attr($api.byId('codebt'), 'disabled', false);
+				clearInterval(intervalId);
+			}
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var tel = $api.getStorage('phone');
+			var telstr = '+86 ' + tel;
+			$api.html($api.byId('sub-tel'), telstr);
+			intervalId = setInterval("countDown()", 1000);
+		}
+	</script>
+</html>

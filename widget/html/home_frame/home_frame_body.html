@@ -1,0 +1,854 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>主播电台</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../../css/idangerous.swiper.css">
+		<style>
+			html, body {
+				min-height: 100%;
+				overflow: hidden;
+				background-color: #FFFFFF;
+			}
+			.fr {
+				float: right;
+			}
+			.fl {
+				float: left;
+			}
+			.main0 {
+				margin-top: 260px;
+			}
+			.mt5 {
+				margin-top: 5px;
+			}
+			.mt10 {
+				margin-top: 10px;
+			}
+			.mt15 {
+				margin-top: 15px;
+			}
+			.mt20 {
+				margin-top: 20px;
+			}
+			.ml5 {
+				margin-left: 0.5em;
+			}
+			.mr5 {
+				margin-right: 0.5em;
+			}
+			.hdivider {
+				width: 100%;
+				height: 1px;
+				background-color: #e0e0e0;
+			}
+			.br {
+				border-right: 1px solid #e0e0e0;
+			}
+			.row {
+				display: -webkit-box;
+				display: -webkit-flex;
+			}
+			.col {
+				-webkit-box-flex: 1;
+				-webkit-flex: 1;
+				flex: 1;
+				margin: 0 5px;
+				position: relative;
+			}
+			.swiper-container img {
+				width: 100%;
+			}
+			/* 歌单标题 */
+			.sectionTitle {
+				height: 2em;
+				line-height: 2em;
+				font-size: 1.12em;
+			}
+			.sectionTitle .titleDivider {
+				display: inline-block;
+				height: 1.12em;
+				width: 3px;
+				vertical-align: top;
+				background-color: #05a0f5;
+				margin-top: 0.44em;
+				margin-left: 0.7em;
+				margin-right: 0.3em;
+			}
+			/* 歌单 */
+			.col .listcoverbar {
+				position: absolute;
+				top: 0;
+				background-color: rgba(0,0,0,0.4);
+				width: 100%;
+				height: 1.2em;
+			}
+			.col .listcoverbar span {
+				color: #fff;
+			}
+			.col .listcoverbar .earphone {
+				width: 1em;
+				margin-top: 0.2em;
+				margin-right: 0.3em;
+			}
+			.col .listcover {
+				width: 100%;
+			}
+			.col .listtitle {
+				height: 2.4em;
+				font-size: 1em;
+				line-height: 1.2em;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+			}
+			/* item样式 */
+			.egret-item {
+				height: 4em;
+			}
+			.egret-item .egret-item-box-cover-center {
+				display: table;
+				height: inherit;
+			}
+			.egret-item .egret-item-box-cover-center .egret-item-box-abtc {
+				display: table-cell;
+				vertical-align: middle;
+			}
+			.egret-item .egret-item-box-cover-center .egret-item-box-abtc img {
+				width: 3em;
+				vertical-align: top;
+			}
+			/* 右侧箭头样式 */
+			.egret-item .egret-item-arrow {
+				display: table;
+				height: inherit;
+			}
+			.egret-item .egret-item-arrow .egret-item-box-abtc {
+				display: table-cell;
+				vertical-align: middle;
+			}
+			.egret-item .egret-item-arrow .egret-item-box-abtc img {
+				width: 0.8em;
+				vertical-align: top;
+			}
+			/* 中间shelf  两个条目*/
+			.egret-item .egret-item-shelf {
+				height: inherit;
+			}
+			.egret-item .egret-item-shelf .egret-item-shelf-title {
+				font-size: 1.1em;
+				margin-top: 0.6em;
+			}
+			.egret-item .egret-item-shelf .egret-item-shelf-subtitle {
+				font-size: 0.6em;
+				color: #666;
+				margin-top: 0.6em;
+			}
+			/* 中间shelf 一个条目 */
+			.egret-item .egret-item-shelf-single {
+				height: inherit;
+				line-height: 4em;
+				font-size: 1.1em;
+			}
+			.egret-item .egret-item-shelf-redclassify {
+				color: #E03F40;
+				border: 1px solid #E03F40;
+				font-size: inherit;
+				padding: 0.1em;
+				border-radius: 1px;
+				margin-right: 5px;
+			}
+			/* 用flex重写框架 */
+			.egret-flex-item {
+				display: -webkit-box;
+				-webkit-box-align: center;
+				height: 3em;
+				background-color: #fff;
+			}
+			/* 左部logo */
+			.egret-flex-item-logo {
+				max-width: 50px;
+				min-width: 50px;
+				margin-left: 0.5em;
+				margin-right: 0.2em;
+				-webkit-box-flex: 1;
+				-webkit-box-align: center;
+			}
+			.egret-flex-item-logo img {
+				height: 2em;
+				width: 2em;
+				-webkit-box-align: center;
+				vertical-align: top;/*否则图片不会居中，底部仍然是会有空白*/
+			}
+			/* 中间文本信息 */
+			.egret-flex-item-shelf {/*overflow: hidden;*/
+				-webkit-box-flex: 2;
+				-webkit-box-align: center;
+			}
+			.egret-flex-item-shelf div {
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow: hidden;
+			}
+			.egret-flex-item-shelf .egret-flex-item-shelf01 {
+				font-size: 1.1em;
+			}
+			.egret-flex-item-shelf .egret-flex-item-shelf02 {
+				font-size: 0.6em;
+				color: #666;
+				margin-top: 0.6em;
+			}
+			.egret-flex-item-shelf .egret-flex-item-redclassify {
+				color: #E03F40;
+				border: 1px solid #E03F40;
+				font-size: inherit;
+				padding: 0.1em;
+				border-radius: 1px;
+				margin-right: 5px;
+			}
+			/* 右部箭头 */
+			.egret-flex-item-arrow {
+				-webkit-box-flex: 1;
+				max-width: 10px;
+				min-width: 10px;
+				margin-right: 15px;
+			}
+			.egret-flex-item-arrow img {
+				width: 100%;
+				max-width: 10px;
+			}
+			/* 暗头部 */
+			.egret-dark-title {
+				height: 1.4em;
+				line-height: 1.4em;
+				font-size: 0.8em;
+				background-color: #e7e7e7;
+				color: #666;
+				padding-left: 10px;
+			}
+			/* special 对个别自定义 */
+			.special {
+				height: 4em;
+			}
+			.special .egret-flex-item-logo img {
+				height: 3em;
+				width: 3em;
+			}
+			/* */
+			.inputmusic {
+				text-align: center;
+				margin-top: 30px;
+			}
+			.inputmusic p {
+				color: #6F6F6F;
+			}
+			.inputmusic p .inputbtn {
+				color: #3A9DD3;
+				text-decoration: underline;
+			}
+			/* 独立条目 */
+			.isolateitem-top {
+				margin-top: 10px;
+				border-top: 1px solid #e0e0e0;
+			}
+			.isolateitem-bottom {
+				border-bottom: 1px solid #e0e0e0;
+			}
+			/* 退出 */
+			.exitbtn {
+				margin-top: 500px;
+				margin: 15px 10px;
+				border-radius: 4px;
+				border: 1px solid #05a0f6;
+				background-color: #fff;
+				color: #05a0f6;
+				text-align: center;
+				height: 2em;
+				line-height: 2em;
+			}
+			/* 个人用户标题 */
+			.profile {
+				height: 5em;
+			}
+			.profile .egret-flex-item-logo img {
+				height: 4em;
+				width: 4em;
+			}
+			.profile .egret-flex-item-logo {
+				max-width: 5em;
+				min-width: 5em;
+				margin-left: 1.5em;
+				margin-right: 0.2em;
+				-webkit-box-flex: 1;
+				-webkit-box-align: center;
+			}
+			.profile .egret-flex-item-shelf .egret-flex-item-shelf01 {
+				font-size: 1em;
+			}
+			.profile .egret-flex-item-shelf .egret-flex-item-shelf02 {
+				font-size: 0.6em;
+				color: #666;
+				margin-top: 0.6em;
+				padding: 0 0.3em;
+				border: 1px solid #e0e0e0;
+				border-radius: 3px;/*box-sizing: border-box;*/
+			}
+			.userinfo {
+				display: -webkit-box;
+				background-color: #fff;
+				padding: 10px 0;
+			}
+			.userinfo .userinfocol {
+				-webkit-box-flex: 1;
+				text-align: center;
+			}
+			.userinfo .userinfocol .info {
+				font-size: 0.8em;
+				color: #999;
+			}
+			.userinfo .userinfocol .num {
+				padding-top: 5px;
+				font-weight: bold;
+			}
+			/* 悬浮 */
+			.exitbtnhover {
+				background-color: #05a0f6;
+				color: #fff;
+			}
+			.fmbtnhover {
+				background: #D8D9DA;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="main0">
+			<ul class="aui-list-view">
+				<li class="aui-list-view-cell" data-win="list_thumb" onclick="notice()">
+					<a class="aui-arrow-right"> 平台公告 <span class="aui-badge aui-badge-danger">0</span> </a>
+				</li>
+			</ul>
+			<!--收益数据 -->
+			<div class="userinfo">
+				<div class="userinfocol01 userinfocol br">
+					<div class="info">
+						今日接单
+					</div>
+					<div class="num">
+						0
+					</div>
+				</div>
+				<div class="userinfocol02 userinfocol br">
+					<div class="info">
+						今日收益
+					</div>
+					<div class="num">
+						0
+					</div>
+				</div>
+				<div class="userinfocol03 userinfocol">
+					<div class="info">
+						评价等级
+					</div>
+					<div class="num">
+						0
+					</div>
+				</div>
+			</div>
+			<ul class="aui-grid-nine">
+				<li class="aui-col-xs-4 aui-text-center"  onclick="kefu()">
+					<span class="aui-iconfont aui-icon-emoji aui-text-danger "></span>
+					<p>
+						客服
+					</p>
+				</li>
+				<li class="aui-col-xs-4 aui-text-center" onclick="order()">
+					<span class="aui-iconfont aui-icon-taxi  aui-text-primary"></span>
+					<p>
+						订单
+					</p>
+				</li>
+				<li class="aui-col-xs-4 aui-text-center" onclick="remark()">
+					<span class="aui-iconfont aui-icon-favor aui-text-warning"></span>
+					<p>
+						评价
+					</p>
+				</li>
+			</ul>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+		var lStatus;
+		var siteUrl = '';
+		var iswinOpen = false;
+		function openNewWin(winname) {
+			api.openWin({
+				name : winname,
+				url : './' + winname + '.html',
+				delay : 200
+			});
+		}
+
+		function kefu() {
+			//创建美洽
+			var mq = api.require('meiQia');
+			//配置初始化美洽需要的appkey
+			var key = $api.getStorage('meiqiakey');
+			var param = {
+				appkey : key
+			};
+			//初始化美洽
+			mq.initMeiQia(param, function(ret, err) {
+				if (ret) {
+					//初始化成功
+					//alert(JSON.stringify(ret));
+				} else {
+					//初始化失败
+					alert(JSON.stringify(err));
+				}
+			})
+			//设置title以及按钮颜色
+			var titleColor = {
+				color : "#fbfcfd"
+			};
+			mq.setTitleColor(titleColor);
+			//设置标题栏背景颜色
+			var titleBarColor = {
+				color : "#AE1B21"
+			};
+			mq.setTitleBarColor(titleBarColor);
+			var db = api.require('db');
+			db.selectSql({
+				name : 'order',
+				sql : 'SELECT Id FROM Data limit 50'
+			}, function(ret, err) {
+				if (ret.status) {
+					var data = ret.data.join("/");
+					var alias = $api.getStorage('phone');
+					/*mq.setPreSendTextMessage({
+					 message:alias+'_Oid_50：'+data
+					 });
+					 */
+					mq.show();
+				} else {
+					api.alert({
+						msg : err.msg
+					});
+				}
+			});
+		}
+
+		function order() {
+			openNewWin('order');
+		}
+
+		function remark() {
+			openNewWin('remark');
+		}
+
+		function notice() {
+			openNewWin('notice');
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			init();
+			//监听window
+			var lp = api.require('bMap');
+			var systemType = api.systemType;
+			if (systemType == 'android') {
+				api.addEventListener({
+					name : 'viewdisappear'
+				}, function(ret, err) {
+					lp.close();
+					//隐藏
+				});
+				api.addEventListener({
+					name : 'viewappear'
+				}, function(ret, err) {
+					init();
+					lp.open({
+						rect : {
+							x : 0,
+							y : 0,
+							w : api.winWidth,
+							h : 260
+						},
+						center : {
+							lon : 116.4021310000,
+							lat : 39.9994480000
+						},
+						zoomLevel : 18,
+						showUserLocation : true,
+						fixedOn : 'home_frame',
+						fixed : true
+					}, function(ret) {
+						lp.showUserLocation({
+							isShow : true,
+							trackingMode : 'follow'
+						});
+					});
+				});
+			}
+			var loginStatus;
+			lp.open({
+				rect : {
+					x : 0,
+					y : 0,
+					w : api.winWidth,
+					h : 260
+				},
+				center : {
+					lon : 116.4021310000,
+					lat : 39.9994480000
+				},
+				zoomLevel : 18,
+				showUserLocation : true,
+				fixedOn : 'home_frame',
+				fixed : true
+			}, function(ret) {
+				lp.showUserLocation({
+					isShow : true,
+					trackingMode : 'follow'
+				});
+			});
+			lp.getLocation({
+				accuracy : '10m',
+				autoStop : false,
+				filter : 1
+			}, function(ret, err) {
+				if (ret.status) {
+					if (loginStatus != 1) {
+						loginStatus = $api.getStorage('login');
+						return;
+					} else {
+						var didNum = $api.getStorage('did');
+					}
+					api.ajax({
+						url : siteUrl,
+						method : 'post',
+						timeout : 30,
+						dataType : 'json',
+						returnAll : false,
+						data : {
+							values : {
+								lon : ret.lon,
+								lat : ret.lat,
+								tt : ret.timestamp,
+								did : didNum,
+								op : 10
+							}
+						}
+					}, function(ret, err) {
+						if (ret) {
+							//
+							//更新完位置
+						} else {
+							//alert(JSON.stringify(err));
+						}
+					});
+				} else {
+					//alert(err.code);
+				}
+			});
+			//和服务器握手时间间隔5秒
+			setInterval("handshake()", 3000);
+		}
+		function handshake() {
+			if (lStatus != 1) {
+				lStatus = $api.getStorage('login');
+				return;
+			} else {
+				var didNum = $api.getStorage('did');
+			}
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						did : didNum,
+						op : 13
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.data != 1) {
+						var status = ret.data.status;
+						var oidNum = $api.getStorage('oid');
+						if (ret.data.id == oidNum && status == 2) {//接单后乘客取消
+							$api.rmStorage('arrive');
+							$api.rmStorage('oid');
+							$api.rmStorage('time');
+							api.closeWin({
+								name : 'arrive_user',
+								type : 'flip',
+								subType : 'from_bottom',
+								duration : 500
+							});
+							return false;
+						}
+					}
+					if (ret.data == 1 && ret.corder != 1) {
+						for (var i = 0; i < ret.corder.length; i++) {
+							var alias = $api.getStorage('phone');
+							var content = ret.corder[i];
+							var objContent = JSON.parse(ret.corder[i]);
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										oid : objContent.id,
+										alias : alias,
+										op : 19
+									}
+								}
+							}, function(ret, err) {
+							});
+							api.sendEvent({
+								name : 'dachemsg',
+								extra : objContent
+							});
+						}
+					}
+				} else {
+					api.toast({
+						msg : '与服务器连接失败，请检查网络-handshake',
+						duration : 2000,
+						location : 'bottom'
+					});
+				}
+			});
+		}
+
+		function init() {
+			var didValue = $api.getStorage('did');
+			var uniacidValue = $api.getStorage('uniacid');
+			api.ajax({//获取数据
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						did : didValue,
+						uniacid : uniacidValue,
+						op : 7
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					document.getElementsByClassName('num')[0].innerHTML = ret.info.count;
+					document.getElementsByClassName('num')[1].innerHTML = ret.info.yestodayfee;
+					document.getElementsByClassName('num')[2].innerHTML = ret.info.score;
+					document.getElementsByClassName('aui-badge')[0].innerHTML = ret.info.notice;
+					//检测并恢复订单
+					if (ret.data != 1 && ret.data.status != 2) {
+						var currentPage = $api.getStorage('arrive');
+						if (currentPage != 1 && currentPage != 2) {
+							var address0 = null, from_user = null, locationx = null, locationy = null, mobile = null;
+							var id = ret.data.id;
+							var status = ret.data.status;
+							address0 = ret.data.address;
+							locationx = ret.data.locationx;
+							locationy = ret.data.locationy;
+							from_user = ret.data.from_user;
+							mobile = ret.data.mobile;
+							var db = api.require('db');
+							var sql = "select * from Data where id='" + id + "';";
+							db.selectSql({
+								name : 'order',
+								sql : sql
+							}, function(ret, err) {
+								if (ret.status) {
+									if (ret.data.length == 0) {
+										var sqlInsert = "insert into Data(Id,From_user,Address,Locationx,Locationy,Mobile) values('" + id + "','" + from_user + "','" + address0 + "','" + locationx + "','" + locationy + "','" + mobile + "');"
+										db.executeSql({
+											name : 'order',
+											sql : sqlInsert
+										}, function(ret, err) {
+											if (ret.status) {
+												var wxVoicePlus = api.require('wxVoicePlus');
+												wxVoicePlus.speechSynthesizerConfiguration({
+													appId : 'wx9c4fac1030c9fde0'
+												});
+												wxVoicePlus.startSpeechSynthesizer({
+													text : '您有待完成的订单 ' + address0
+												}, function(ret) {
+													if (ret) {
+														//alert(JSON.stringify(ret));
+													}
+												});
+												var dialogBox = api.require('dialogBox');
+												dialogBox.taskPlan({
+													rect : {
+														w : 300
+													},
+													texts : {
+														mainTitle : '提示',
+														subTitle : '您有待完成的订单',
+														btnTitle : '去完成订单'
+													},
+													styles : {
+														bg : '#fff',
+														corner : 4,
+														main : {
+															marginT : 20,
+															color : '#636363',
+															size : 16,
+															bold : true,
+														},
+														sub : {
+															marginT : 8,
+															color : '#999999',
+															size : 14,
+														},
+														ok : {
+															marginB : 10,
+															marginL : 10,
+															w : 280,
+															h : 40,
+															bg : '#FF9000',
+															color : '#fff',
+															size : 18
+														}
+													}
+												}, function(ret) {
+													if (ret.eventType == 'ok') {
+														dialogBox.close({
+															dialogName : 'taskPlan'
+														});
+														//进入相应页面仿index
+														$api.setStorage('oid', id);
+														$api.rmStorage('time');
+														if (status == 1) {
+															//接客页面
+															api.openWin({
+																name : 'arrive_user',
+																url : '../../html/arrive_user.html',
+																delay : 500
+															});
+														} else if (status == 3) {
+															//送客页面
+															api.openWin({
+																name : 'arrive_user',
+																url : '../../html/arrive_user.html',
+																delay : 200
+															});
+															$api.setStorage('from', 2);
+														} else {
+															//已经送达乘客不处理
+														}
+													}
+												});
+											} else {
+												api.alert({
+													msg : err.msg + id
+												});
+											}
+										});
+									} else {
+										var wxVoicePlus = api.require('wxVoicePlus');
+										wxVoicePlus.speechSynthesizerConfiguration({
+											appId : 'wx9c4fac1030c9fde0'
+										});
+										wxVoicePlus.startSpeechSynthesizer({
+											text : '您有待完成的订单 ' + address0
+										}, function(ret) {
+											if (ret) {
+												//alert(JSON.stringify(ret));
+											}
+										});
+										var dialogBox = api.require('dialogBox');
+										dialogBox.taskPlan({
+											rect : {
+												w : 300
+											},
+											texts : {
+												mainTitle : '提示',
+												subTitle : '您有未完成的订单',
+												btnTitle : '去完成订单'
+											},
+											styles : {
+												bg : '#fff',
+												corner : 4,
+												main : {
+													marginT : 20,
+													color : '#636363',
+													size : 16,
+													bold : true,
+												},
+												sub : {
+													marginT : 8,
+													color : '#999999',
+													size : 14,
+												},
+												ok : {
+													marginB : 10,
+													marginL : 10,
+													w : 280,
+													h : 40,
+													bg : '#FF9000',
+													color : '#fff',
+													size : 18
+												}
+											}
+										}, function(ret) {
+											if (ret.eventType == 'ok') {
+												dialogBox.close({
+													dialogName : 'taskPlan'
+												});
+												//相应页面仿index
+												$api.setStorage('oid', id);
+												$api.rmStorage('time');
+												if (status == 1) {
+													//接客页面
+													api.openWin({
+														name : 'arrive_user',
+														url : '../../html/arrive_user.html',
+														delay : 200
+													});
+												} else if (status == 3) {
+													//送客页面
+													api.openWin({
+														name : 'arrive_user',
+														url : '../../html/arrive_user.html',
+														delay : 200
+													});
+													$api.setStorage('from', 2);
+												} else {
+													//已经送达乘客不处理
+												}
+											}
+										});
+									}
+								} else {
+									alert(JSON.stringify(err));
+								}
+							});
+						}
+					}
+				} else {
+					alert('网络连接失败，请检查网络');
+				}
+			});
+		}
+	</script>
+</html>

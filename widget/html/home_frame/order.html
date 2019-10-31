@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+		<style>
+			html, body {
+				min-height: 100%;
+				background-color: #f9f9f9;
+			}
+			/* 头部 */
+			.topbar {
+				background: #AE1B21;
+				height: 50px;
+				border-bottom: 1px solid #DDDFE3;
+				position: relative;
+			}
+			.egret-header-box {
+				height: 50px;
+			}
+			.egret-img {
+				position: absolute;
+			}
+			.egret-img img {
+				height: 50px;
+				padding: 10px;
+				vertical-align: top;
+			}
+			.egret-header-search {
+				background-color: #fff;
+				position: absolute;
+				left: 60px;
+				right: 20px;
+				height: 34px;
+				margin-top: 8px;
+				border-radius: 4px;
+			}
+			.egret-header-search img {
+				margin-left: 30px;
+				height: 20px;
+				margin-top: 7px;
+			}
+			.egret-header-search input {
+				line-height: 24px;
+				font-size: 14px;
+				padding-top: 5px;
+			}
+			.egret-header-search input:focus {/*border:0;*/
+				outline: none;
+			}
+			/* 第二头部 */
+			.egret-header-text {
+				line-height: 50px;
+				color: #fff;
+				font-size: 16px;
+				padding: 0 10px;
+			}
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="secHeader" class="titlebar">
+			<div class="egret-header topbar">
+				<div class="egret-header-title">
+					我的订单
+				</div>
+				<div  class="egret-img"><img src="../../image/cm2_icn_back.png" alt="" onclick="goback()" >
+				</div>
+				<!-- <div  class="egret-img toRight"><img src="../../image/cm2_poplay_icn_reply.png" alt="" onclick="emptycache()" ></div> -->
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+			var siteUrl = '';
+		function goback() {
+			api.closeWin({
+				name : 'order'
+			});
+		}
+
+		apiready = function() {
+					var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			//加载
+			var activity = api.require('UILoading');
+			activity.keyFrame({
+				rect : {
+					w : 80,
+					h : 100
+				},
+				styles : {
+					bg : 'rgba(0,0,0,0.5)',
+					corner : 5,
+					interval : 50,
+					frame : {
+						w : 80,
+						h : 80
+					}
+				}
+			}, function(ret) {
+				//alert(JSON.stringify(ret));
+			});
+			var UIListView = api.require('UIListView');
+			firstHeaderOffset = $api.offset(secHeader);
+			UIListView.open({
+				rect : {
+					x : 0,
+					y : firstHeaderOffset.h,
+					w : api.winWidth,
+					h : api.frameHeight
+				},
+				data : [{}],
+				rightBtns : [{
+					bgColor : '#388e8e',
+					activeBgColor : '',
+					width : 70,
+					title : '按钮',
+					titleSize : 12,
+					titleColor : '#fff',
+					icon : '',
+					iconWidth : 20
+				}],
+				styles : {
+					borderColor : '#e0e0e0',
+					item : {
+						bgColor : '#FFFFFF',
+						activeBgColor : '#F5F5F5',
+						height : 70.0,
+						imgWidth : 40,
+						imgHeight : 40,
+						imgCorner : 4,
+						placeholderImg : '',
+						titleSize : 17.0,
+						titleColor : '#434343',
+						subTitleSize : 16.0,
+						subTitleColor : '#434343',
+						remarkColor : '#434343',
+						remarkSize : 14,
+						remarkIconWidth : 30
+					}
+				},
+				fixedOn : api.frameName
+			}, function(ret, err) {
+				if (ret) {
+				//解决ios初始化问题
+				if (ret.eventType == 'show') {
+				   UIListView.deleteItem({
+    				index: 0
+						}, function(ret, err) {
+					});
+				 }
+				if (ret.eventType == 'clickContent') {
+						UIListView.getDataByIndex({
+							index : ret.index
+						}, function(ret, err) {
+							if (ret) {
+								var dialogBox = api.require('dialogBox');
+			dialogBox.receipt({
+				rect : {
+					w : 290,
+					h : 360
+				},
+				tapClose:true,
+				items : [{
+					key : '起点：'+ret.data.title,
+					value : ''
+				}, {
+					key : '终点：'+ret.data.subTitle,
+					value : ''
+				}, {
+					key : '费用',
+					value : ret.data.fee+'元'
+				}, {
+					key : '下单时间',
+					value : ret.data.ctime
+				}, {
+					key : '接单时间',
+					value : ret.data.remark
+				}, {
+					key : '订单类型',
+					value : ret.data.type
+				}, {
+					key : '支付',
+					value : ret.data.ispay
+				}],
+				texts : {
+					title : '订单详情',
+					cancel : '确定'
+				},
+				styles : {
+					bg : '#FFF',
+					corner : 4,
+					title : {
+						textColor : '#4B4B4B',
+						textSize : 18,
+						marginT : 10
+					},
+					topBorder : {
+						borderColor : '#C0C0C0',
+						borderWidth : 2,
+						marginT : 10
+					},
+					listHeight : 260,
+					item : {
+						textColor : '#4B4B4B',
+						textSize : 14,
+						marginL : 10,
+						marginT : 5,
+						marginB : 5,
+						bgColor : '#FFF'
+					},
+					bottomBorder : {
+						borderColor : '#C0C0C0',
+						borderWidth : 4,
+					},
+					cancel : {
+						textSize : 16,
+						textColor : '#4B4B4B',
+						marginT : 10,
+						highlight : '#696969'
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+				    var dialogBox = api.require('dialogBox');
+					dialogBox.close({
+						dialogName : 'receipt'
+					});
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+					}
+				} else {
+				}
+			});
+			//追加数据
+			var didValue = $api.getStorage('did');
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						did : didValue,
+						op : '2'
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.length > 0) {
+						var datas = [];
+						// 数据源.
+						for (var i = 0; i < ret.length; i++) {
+							if (ret[i].start.length > 13) {
+								ret[i].start = ret[i].start.substring(0, 13) + '···';
+							}
+							if (ret[i].end.length > 13) {
+								ret[i].end = ret[i].end.substring(0, 13) + '···';
+							}
+							var data = {
+								uid : ret[i].id,
+								imgPath : '',
+								title : ret[i].start,
+								subTitle : ret[i].end,
+								fee : ret[i].fee,
+								ctime : ret[i].ctime,
+								remark : ret[i].receivetime,
+								ispay : ret[i].ispay,
+								type : ret[i].type
+							};
+							datas.push(data);
+						}
+						UIListView.appendData({
+							data : datas
+						}, function(ret, err) {
+							if (ret) {
+								activity.closeKeyFrame();
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+					} else {
+						activity.closeKeyFrame();
+					}
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+		}
+	</script>
+</html>

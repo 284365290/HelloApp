@@ -1,0 +1,747 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="wei.winmo.com.cn" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>我的订单</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+		<style>
+			html, body {
+				min-height: 100%;
+				background-color: #f3f3f3;
+				height: 100%;
+			}
+			.fr {
+				float: right;
+			}
+			.fl {
+				float: left;
+			}
+			.mt5 {
+				margin-top: 5px;
+			}
+			.mt10 {
+				margin-top: 10px;
+			}
+			.mt15 {
+				margin-top: 15px;
+			}
+			.mt20 {
+				margin-top: 20px;
+			}
+			.ml5 {
+				margin-left: 0.5em;
+			}
+			.mr5 {
+				margin-right: 0.5em;
+			}
+			.hdivider {
+				width: 100%;
+				height: 1px;
+				background-color: #e0e0e0;
+			}
+			.br {
+				border-right: 1px solid #e0e0e0;
+			}
+			.pl10 {
+				padding-left: 10px;
+			}
+			.row {
+				display: -webkit-box;
+				display: -webkit-flex;
+			}
+			.col {
+				-webkit-box-flex: 1;
+				-webkit-flex: 1;
+				flex: 1;
+				margin: 0 5px;
+				position: relative;
+			}
+			.swiper-container img {
+				width: 100%;
+			}
+			/* 歌单标题 */
+			.sectionTitle {
+				height: 2em;
+				line-height: 2em;
+				font-size: 1.12em;
+			}
+			.sectionTitle .titleDivider {
+				display: inline-block;
+				height: 1.12em;
+				width: 3px;
+				vertical-align: top;
+				background-color: #05a0f5;
+				margin-top: 0.44em;
+				margin-left: 0.7em;
+				margin-right: 0.3em;
+			}
+			/* 歌单 */
+			.col .listcoverbar {
+				position: absolute;
+				top: 0;
+				background-color: rgba(0,0,0,0.4);
+				width: 100%;
+				height: 1.2em;
+			}
+			.col .listcoverbar span {
+				color: #fff;
+			}
+			.col .listcoverbar .earphone {
+				width: 1em;
+				margin-top: 0.2em;
+				margin-right: 0.3em;
+			}
+			.col .listcover {
+				width: 100%;
+			}
+			.col .listtitle {
+				height: 2.4em;
+				font-size: 1em;
+				line-height: 1.2em;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+			}
+			/* item样式 */
+			.egret-item {
+				height: 4em;
+			}
+			.egret-item .egret-item-box-cover-center {
+				display: table;
+				height: inherit;
+			}
+			.egret-item .egret-item-box-cover-center .egret-item-box-abtc {
+				display: table-cell;
+				vertical-align: middle;
+			}
+			.egret-item .egret-item-box-cover-center .egret-item-box-abtc img {
+				width: 3em;
+				vertical-align: top;
+			}
+			/* 右侧箭头样式 */
+			.egret-item .egret-item-arrow {
+				display: table;
+				height: inherit;
+			}
+			.egret-item .egret-item-arrow .egret-item-box-abtc {
+				display: table-cell;
+				vertical-align: middle;
+			}
+			.egret-item .egret-item-arrow .egret-item-box-abtc img {
+				width: 0.8em;
+				vertical-align: top;
+			}
+			/* 中间shelf  两个条目*/
+			.egret-item .egret-item-shelf {
+				height: inherit;
+			}
+			.egret-item .egret-item-shelf .egret-item-shelf-title {
+				font-size: 1.1em;
+				margin-top: 0.6em;
+			}
+			.egret-item .egret-item-shelf .egret-item-shelf-subtitle {
+				font-size: 0.6em;
+				color: #666;
+				margin-top: 0.6em;
+			}
+			/* 中间shelf 一个条目 */
+			.egret-item .egret-item-shelf-single {
+				height: inherit;
+				line-height: 4em;
+				font-size: 1.1em;
+			}
+			.egret-item .egret-item-shelf-redclassify {
+				color: #E03F40;
+				border: 1px solid #E03F40;
+				font-size: inherit;
+				padding: 0.1em;
+				border-radius: 1px;
+				margin-right: 5px;
+			}
+			/* 用flex重写框架 */
+			.egret-flex-item {
+				display: -webkit-box;
+				-webkit-box-align: center;
+				height: 3em;/*background-color: #fff;*/
+			}
+			/* 左部logo */
+			.egret-flex-item-logo {
+				max-width: 50px;
+				min-width: 50px;
+				margin-left: 0.5em;
+				margin-right: 0.2em;
+				-webkit-box-flex: 1;
+				-webkit-box-align: center;
+				text-align: center;
+			}
+			.egret-flex-item-logo img {
+				height: 2em;
+				width: 2em;
+				-webkit-box-align: center;
+				vertical-align: top;/*否则图片不会居中，底部仍然是会有空白*/
+			}
+			/* 中间文本信息 */
+			.egret-flex-item-shelf {
+				overflow: hidden;
+				-webkit-box-flex: 2;
+				-webkit-box-align: center;
+			}
+			.egret-flex-item-shelf div {
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow: hidden;
+			}
+			.egret-flex-item-shelf .egret-flex-item-shelf01 {
+				font-size: 1.1em;
+			}
+			.egret-flex-item-shelf .egret-flex-item-shelf02 {
+				font-size: 0.6em;
+				color: #666;
+				margin-top: 0.6em;
+			}
+			.egret-flex-item-shelf .egret-flex-item-redclassify {
+				color: #E03F40;
+				border: 1px solid #E03F40;
+				font-size: inherit;
+				padding: 0.1em;
+				border-radius: 1px;
+				margin-right: 5px;
+			}
+			/* 右部箭头 */
+			.egret-flex-item-arrow {
+				-webkit-box-flex: 1;
+				max-width: 10px;
+				min-width: 10px;
+				margin-right: 15px;
+			}
+			.egret-flex-item-arrow img {
+				width: 100%;
+				max-width: 10px;
+			}
+			/* 暗头部 */
+			.egret-dark-title {
+				height: 1.4em;
+				line-height: 1.4em;
+				font-size: 0.8em;
+				background-color: #e7e7e7;
+				color: #666;
+				padding-left: 10px;
+			}
+			/* special 对个别自定义 */
+			.special {
+				height: 4em;
+			}
+			.special .egret-flex-item-logo img {
+				height: 3em;
+				width: 3em;
+			}
+			/* */
+			.inputmusic {
+				text-align: center;
+				margin-top: 30px;
+			}
+			.inputmusic p {
+				color: #6F6F6F;
+			}
+			.inputmusic p .inputbtn {
+				color: #3A9DD3;
+				text-decoration: underline;
+			}
+			/* 独立条目 */
+			.isolateitem-top {
+				margin-top: 10px;
+				border-top: 1px solid #e0e0e0;
+			}
+			.isolateitem-bottom {
+				border-bottom: 1px solid #e0e0e0;
+			}
+			/* 退出 */
+			.exitbtn {
+				margin: 15px 10px;
+				border-radius: 4px;
+				border: 1px solid #05a0f6;
+				background-color: #fff;
+				color: #05a0f6;
+				text-align: center;
+				height: 2em;
+				line-height: 2em;
+			}
+			/* 个人用户标题 */
+			.musiclistprofile {
+				height: 7em;
+				background-color: #fff;
+			}
+			.musiclistprofile .egret-flex-item-logo img {
+				height: 6em;
+				width: 6em;
+			}
+			.musiclistprofile .egret-flex-item-logo {
+				max-width: 6em;
+				min-width: 6em;
+				margin-left: 0.5em;
+				margin-right: 0.2em;
+				-webkit-box-flex: 1;
+				-webkit-box-align: center;
+			}
+			.musiclistprofile .egret-flex-item-shelf {
+				margin-left: 0.5em;
+			}
+			.musiclistprofile .egret-flex-item-shelf .egret-flex-item-shelf01 {
+				font-size: 1.5em;
+			}
+			.musiclistprofile .egret-flex-item-shelf .egret-flex-item-shelf02 {
+				margin-top: 1.6em;
+				-webkit-box-align: center;
+				display: -webkit-box;
+			}
+			.musiclistprofile .egret-flex-item-shelf .egret-flex-item-shelf02 .createrlogo {
+				width: 2em;
+			}
+			.musiclistprofile .egret-flex-item-shelf .egret-flex-item-shelf02 .creatername {
+				margin: 0 1em;
+			}
+			.userinfo {
+				display: -webkit-box;
+				background-color: #fff;/*padding: 10px 0;*/
+			}
+			.userinfo .userinfocol {/*-webkit-box-flex:1;*/
+				padding: 10px 0;
+				text-align: center;
+				width: 25%;
+				box-sizing: border-box;
+			}
+			.userinfo .userinfocol .info {
+				font-size: 0.8em;
+				color: #999;
+			}
+			.userinfo .userinfocol .info img {
+				width: 2em;
+			}
+			.userinfo .userinfocol .num {
+				padding-top: 5px;
+			}
+			/* 播放全部*/
+			.playall {/*background-color: #f9f9f9;*/
+			}
+			.playall .egret-flex-item-arrow {
+				-webkit-box-flex: 1;
+				max-width: 2.0em;
+				min-width: 2.0em;
+				margin-right: 15px;
+			}
+			.playall .egret-flex-item-arrow img {
+				max-width: none;
+			}
+			.playall .egret-flex-item-logo img {
+				width: 1.5em;
+				height: 1.5em;
+			}
+			/* egret item 抽象右部 */
+			.egret-flex-item-abright {
+				display: -webkit-box;
+				-webkit-box-flex: 1;
+				border-bottom: 1px solid #e0e0e0;
+				-webkit-box-align: center;
+				height: 4em;
+			}
+			/* musiclist 特殊样式 */
+			.musiclist-item {
+				height: 4em;
+			}
+			.musiclist-item .egret-flex-item-logo {
+				text-align: center;
+				font-size: 1.2em;
+				color: #999999;
+			}
+			.musiclist-item .egret-flex-item-shelf .egret-flex-item-shelf01 {
+				font-size: 1em;
+			}
+			.musiclist-item .egret-flex-item-arrow {
+				max-width: 24px;
+				min-width: 24px;
+			}
+			.musiclist-item .egret-flex-item-arrow img {
+				max-width: none;
+			}
+			/* 弹出工具条 */
+			.musiclist-item-tool {
+				background-color: #303030;
+				color: #fff;
+				display: -webkit-box;
+				padding: 0 10px;
+				display: none;
+			}
+			.musiclist-item-tool .userinfocol {
+				-webkit-box-flex: 1;
+				text-align: center;
+				padding: 5px 0;
+			}
+			.musiclist-item-tool .userinfocol .info {
+				color: #FFF;
+				height: 50%
+			}
+			.musiclist-item-tool .userinfocol .num {
+				color: #A8A8A8;
+				font-size: 0.8em;
+			}
+			/* 悬浮 */
+			.exitbtnhover {
+				background-color: #05a0f6;
+				color: #fff;
+			}
+			.userinfo .toolhover {
+				background-color: #e2e2e2;
+			}
+			.musiclist-item-tool .toolhover {
+				background-color: #1d1d1d;
+			}
+			.allplayhover {
+				background-color: #e2e2e2;
+			}
+			/* 头部背景 */
+			.musiclistprofile {
+				height: 9em;
+			}
+			.egret-flex-item .topheaderbg {
+				width: 100%;
+				height: 100%;
+				vertical-align: top;
+			}
+			.egret-flex-item .topheaderlogo {
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				top: 30px;
+				left: 20px;
+			}
+			.egret-flex-item .topheadercollect {
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				top: 70px;
+				right: 20px;
+				background-color: #76110B;
+				border-radius: 25px;
+			}
+			.egret-flex-item .topheadercollect .border {
+				width: 100%;
+			}
+			.egret-flex-item .topheadercollect .inside {
+				position: absolute;
+				width: 100%;
+				bottom: 0;
+			}
+			.egret-flex-item .info {
+				position: absolute;
+				left: 20px;
+				top: 110px;
+				font-size: 0.6em;
+				color: #fff;
+			}
+			/* 搜索 */
+			.searchbar {
+				height: 40px;
+				background: #E7E8EC;
+			}
+			.searchbar .guncotton {
+				margin: 0 10px;
+				height: 40px;
+				line-height: 40px;
+			}
+			.searchbar .guncotton input {
+				width: 100%;
+				font-size: 0.8em;
+				line-height: 2em;
+				height: 2em;
+				outline: none;
+				background-color: #fff;
+				padding-left: 10px;
+				border-radius: 5px;
+				box-sizing: border-box;
+			}
+			/* 清空 */
+			.empty-item {
+				line-height: 3em;
+				text-align: center;
+				display: block;
+				color: #989BA4;
+				border-bottom: 1px solid #e0e0e0;
+			}
+			.empty-item img {
+				vertical-align: top;
+				width: 1.2em;
+				margin-top: 0.7em;
+				margin-right: 0.5em;
+			}
+			.norecord {
+				position: absolute;
+				top: 30%;
+				width: 100%;
+				text-align: center;
+				font-size: 0.8em;
+				color: #989BA4;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="norecord">
+			<img src="../../image/icon_page_nonetwork.png" alt="">
+			<div style="color: #989BA4;">
+				您暂未接单！ 提示：左滑取消订单。
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+		var siteUrl = '';
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var myList = api.require('goodsList');
+			myList.open({
+				x : 0, // 横坐标, 默认 0.
+				y : 0, // 纵坐标, 默认 0.
+				w : api.frameWidth, // 宽度, 默认设备屏幕宽度.
+				h : api.frameHeight, // 高度, 默认 视图高度 + 100.
+				itemSlipDistance : 10,
+				datas : [],
+				itemStyle : {
+					borderColor : '#d9d2e9',
+					interval : 0,
+					titleSize : 17, //（可选项）标题字体大小，数字类型，默认16
+					titleColor : '#4e4949', //（可选项）标题字体颜色，支持 rgb,rgba,#，默认：#000000
+					subTitleSize : 17, //（可选项）子标题字体大小，数字类型，默认13
+					subTitleColor : '#4e4949', //（可选项）子标题字体颜色，支持 rgb,rgba,#，默认：#696969
+					markSize : 15, //（可选项）小标题字体大小，数字类型，默认13
+					markColor : '#706b6b', //（可选项）小标题字体颜色，支持 rgb,rgba,#，默认：#ff0000
+					tagColor : '#ffffff',
+					rightBgColor : 'rgba(0,0,0,0.5)',
+					tagBg : '#7b7676',
+					tagSize : '15',
+					bgColor : '#ffffff',
+					tagHeight : 30,
+					height : 90,
+					avatarH : 85,
+					avatarW : 80
+				},
+				fixedOn : 'third_frame_disclist_body'
+			}, function(ret, err) {
+				if (ret) {
+					var index = ret.index;
+					var id = ret.data.poid;
+					if (ret.eventType == 'rightBtn') {
+						var db = api.require('db');
+						var sql = "select * from DataPinChe  WHERE Id =" + id + ";";
+						db.selectSql({
+							name : 'order',
+							sql : sql
+						}, function(ret, err) {
+							if (ret.status) {
+								if (ret.data.Status == 3) {
+									api.toast({
+										msg : '您已接到乘客，无法取消订单',
+										duration : 2000,
+										location : 'bottom'
+									});
+								} else {
+									var dialogBox = api.require('dialogBox');
+									dialogBox.raffle({
+										texts : {
+											title : '乘客正在焦急等待~',
+											mainText : '司机不可单方取消订单，以下原因方可取消',
+											subText : '1.乘客电话打不通或不接，联系不上乘客\n2.遇到堵车，乘客着急，不愿等待          \n3.车辆临时故障，与乘客沟通后，乘客   \n同意取消                                           ',
+											leftTitle : '去接乘客',
+											rightTitle : '继续取消'
+										},
+										styles : {
+											bg : '#fff',
+											w : 300,
+											corner : 10,
+											title : {
+												size : 15,
+												color : '#000'
+											},
+											icon : {
+												marginT : 20,
+												w : 40,
+												h : 40,
+												iconPath : 'widget://image/common_icn_information.png'
+											},
+											main : {
+												marginT : 20,
+												color : '#636363',
+												size : 14
+											},
+											sub : {
+												marginT : 8,
+												color : '#999999',
+												size : 15
+											},
+											left : {
+												marginB : 7,
+												marginL : 18,
+												w : 130,
+												h : 35,
+												corner : 2,
+												bg : '#fff',
+												color : '#007FFF',
+												size : 16
+											},
+											right : {
+												marginB : 7,
+												marginL : 18,
+												w : 130,
+												h : 35,
+												corner : 2,
+												bg : '#fff',
+												color : '#007FFF',
+												size : 16
+											}
+										},
+										tapClose : true
+									}, function(ret, err) {
+										if (ret) {
+											if (ret.eventType == 'left') {
+												dialogBox.close({
+													dialogName : 'raffle'
+												});
+											}
+											if (ret.eventType == 'right') {
+											dialogBox.close({
+													dialogName : 'raffle'
+												});
+												//更新订单信息
+												var oidNum = $api.getStorage('oid');
+												api.ajax({
+													url : siteUrl,
+													method : 'post',
+													timeout : 30,
+													dataType : 'json',
+													returnAll : false,
+													data : {
+														values : {
+															poid : id,
+															status : 2,
+															op : '17'
+														}
+													}
+												}, function(ret, err) {
+													if (ret) {
+														//删除数据库响应的字段
+														var db = api.require('db');
+														var sqlDelete = "delete from DataPinChe WHERE Id = " + id + ";";
+														db.executeSql({
+															name : 'order',
+															sql : sqlDelete
+														}, function(ret, err) {
+															if (ret.status) {
+																//alert(JSON.stringify(ret));
+															} else {
+																alert(JSON.stringify(err));
+															}
+														});
+														myList.deleteItem({
+															index : index
+														});
+														
+														api.toast({
+															msg : '您已取消订单',
+															duration : 2000,
+															location : 'bottom'
+														});
+													} else {
+														alert(JSON.stringify(err));
+													}
+												});
+											}
+										} else {
+											dialogBox.close({
+												dialogName : 'raffle'
+											});
+											api.toast({
+												msg : '无法取消订单，请检查网络',
+												duration : 2000,
+												location : 'bottom'
+											});
+										}
+									});
+								}
+							}
+						});
+					} else {
+						api.openWin({
+							name : 'parrive_user',
+							url : './parrive_user.html',
+							pageParam : {
+								id : ret.data.poid
+							},
+							animation : {
+								type : "fade", //动画类型（详见动画类型常量）
+								subType : "", //动画子类型（详见动画子类型常量）
+								duration : 300 //动画过渡时间，默认300毫秒
+							},
+							delay : 200
+						});
+					}
+					///alert(JSON.stringify(ret));
+				}
+				else {
+					alert(JSON.stringify(err));
+				}
+			});
+			api.addEventListener({
+				name : 'myPinCheOrder'
+			}, function(ret, err) {
+				var db = api.require('db');
+				var sql = "select * from DataPinChe;";
+				db.selectSql({
+					name : 'order',
+					sql : sql
+				}, function(ret, err) {
+					if (ret.status) {
+						var datas = [];
+						if (ret.data.length > 0) {
+							for (var i = 0; i < ret.data.length; i++) {
+								var data = {
+									poid : ret.data[i].Id,
+									img : ret.data[i].Img, // 头像图片路径,支持本地和网络路径
+									title : ret.data[i].Start, // 标题.
+									subTitle : ret.data[i].End, // 子标题.
+									fee : ret.data[i].Fee,
+									mark : ret.data[i].Gotime,
+									tag : ret.data[i].People,
+									rightBtn : [{
+										bg : '#dbd8d8', //按钮背景色，支持 rgb，rgba，#，默认#ee8262.
+										width : 10,
+										title : '取消订单', //按钮名字，字符串类型，默认‘按钮’
+										titleSize : 15, //按钮标题大小，默认12
+										titleColor : '#434343', // 按钮标题颜色，支持 rgb，rgba，#，默认#ffffff
+										selectedColor : '#434343', //按钮选中时候的颜色值,支持 rgb，rgba，#
+										icon : ''
+									}] // 左滑单元格露出的按钮组.
+								};
+								datas.push(data);
+							}
+							document.getElementsByClassName("norecord")[0].style.display = "none";
+							myList.reloadData({
+								datas : datas
+							});
+						} else {
+							document.getElementsByClassName("norecord")[0].style.display = "block";
+							myList.reloadData({
+								datas : datas
+							});
+						}
+					}
+				});
+			});
+		}
+	</script>
+</html>

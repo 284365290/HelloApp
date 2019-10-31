@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <style>
+    	body{
+    		
+    	}
+    </style>
+</head>
+<body>
+	
+	<div class="aui-content aui-content-padded" id="message-content">
+		<p class="aui-text-center history-date">7-16 20:00</p>
+		<div class="aui-chat-receiver">
+			<div class="aui-chat-receiver-avatar"><img src="../../image/aui/demo2.png"></div>
+			<div class="aui-chat-receiver-cont">
+			<div class="aui-chat-left-triangle"></div>
+			<span>你好！如果想自定义气泡颜色，修改aui-chat-receiver</span>
+			</div>
+		</div>
+		<div class="aui-chat-receiver">
+			<div class="aui-chat-receiver-avatar"><img src="../../image/aui/demo2.png"></div>
+			<div class="aui-chat-receiver-cont">
+				<div class="aui-chat-left-triangle"></div>
+				<span>很高兴见到你！</span>
+			</div>
+		</div>
+		<div class="aui-chat-receiver">
+			<div class="aui-chat-receiver-avatar"><img src="../../image/aui/demo2.png"></div>
+			<div class="aui-chat-receiver-cont">
+				<div class="aui-chat-left-triangle"></div>
+				
+				<span>如果想自定义气泡颜色，修改aui-chat-receiver-cont背景和aui-chat-left-triangle的border-color</span>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+	apiready = function(){
+		var UIListView = api.require('UIListView');
+UIListView.open({
+    rect: {
+        x: 0,
+        y: 0,
+        w: api.winWidth,
+        h: api.frameHeight
+    },
+    data: [{
+        uid: '1001',
+        imgPath: 'c',
+        title: '标题',
+        subTitle: '子标题，说明文字',
+        icon: 'widget://image/qiangdan.png'
+    }],
+    rightBtns: [{
+        bgColor: '#388e8e',
+        activeBgColor: '',
+        width: 70,
+        title: '按钮',
+        titleSize: 12,
+        titleColor: '#fff',
+        icon: '',
+        iconWidth: 20
+    }],
+    styles: {
+        borderColor: '#696969',
+        item: {
+            bgColor: '#FFFFFF',
+            activeBgColor: '#F5F5F5',
+            height: 90.0,
+            imgWidth: 10,
+            imgHeight: 60,
+            imgCorner: 4,
+            placeholderImg: '',
+            titleSize: 12.0,
+            titleColor: '#000',
+            subTitleSize: 12.0,
+            subTitleColor: '#000',
+            remarkColor: '#000',
+            remarkSize: 16,
+            remarkIconWidth: 70
+        }
+    },
+    fixedOn: api.frameName
+}, function(ret, err) {
+    if (ret) {
+        alert(JSON.stringify(ret));
+    } else {
+        alert(JSON.stringify(err));
+    }
+});
+	};
+</script>
+</html>

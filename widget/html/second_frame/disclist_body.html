@@ -1,0 +1,724 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="copyright" content="www.apicloud.com" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>歌单</title>
+		<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+		<style>
+			.norecord {
+				position: absolute;
+				top: 30%;
+				width: 100%;
+				text-align: center;
+				font-size: 0.8em;
+				color: #989BA4;
+			}
+		</style>
+	</head>
+	<body style="background-color:'#413A36';">
+		<div class="norecord">
+			<img src="../../image/icon_page_nonetwork.png" alt="">
+			<div style="color: #989BA4;">
+				暂无待处理订单
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../script/api.js"></script>
+	<script type="text/javascript">
+		var siteUrl = '';
+		function orderView() {
+			/*var didValue = $api.getStorage('did');
+			 return ;
+			 api.ajax({
+			 url : 'http://www.chaorenkeji.com/server.php',
+			 method : 'post',
+			 timeout : 30,
+			 dataType : 'json',
+			 returnAll : false,
+			 data : {
+			 values : {
+			 did : didValue,
+			 op : '2'
+			 }
+			 }
+			 }, function(ret, err) {
+			 if (ret) {
+			 if(ret.length>0){
+			 document.getElementsByClassName("norecord")[0].style.display="none";
+			 }
+			 for(var i = 0; i<ret.length; i++){
+			 var html = '<div class="egret-flex-item musiclist-item" onclick="expandlist(this)"><div class="egret-flex-item-abright"><div class="egret-flex-item-shelf pl10"><div class="egret-flex-item-shelf01">'+ret[i].message+'</div><div class="egret-flex-item-shelf02">实时单</div></div><div class="egret-flex-item-arrow"><img src="../../image/musiclist/musiclistmore.png" alt="" class="toobarimg" ></div></div></div><div class="musiclist-item-tool"><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info">'+ret[i].receivetime+'</div><div class="num">接单时间</div></div><div class="userinfocol" tapmode="toolhover" onclick="downloadMusic()"><div class="info">'+ret[i].usetime+'</div><div class="num">用时</div></div><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info">'+ret[i].mileage+'</div><div class="num">里程</div></div><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info">'+ret[i].fee+'</div><div class="num">车费</div></div></div>';
+			 $api.append($api.dom("body"),html);
+			 }
+			 }
+			 else {
+			 alert(JSON.stringify(err));
+			 }
+			 });
+			 */
+			var activity = api.require('UILoading');
+			activity.keyFrame({
+				rect : {
+					w : 80,
+					h : 100
+				},
+				styles : {
+					bg : 'rgba(0,0,0,0.5)',
+					corner : 5,
+					interval : 50,
+					frame : {
+						w : 80,
+						h : 80
+					}
+				}
+			}, function(ret) {
+				//alert(JSON.stringify(ret));
+			});
+			var UIListView = api.require('UIListView');
+			//firstHeaderOffset = $api.offset(secHeader);
+			UIListView.open({
+				rect : {
+					x : 0,
+					y : 0,
+					w : api.winWidth,
+					h : api.frameHeight
+				},
+				data : [],
+				rightBtns : [{
+					bgColor : '#388e8e',
+					activeBgColor : '',
+					width : 70,
+					title : '按钮',
+					titleSize : 12,
+					titleColor : '#fff',
+					icon : '',
+					iconWidth : 20
+				}],
+				styles : {
+					borderColor : '#e0e0e0',
+					item : {
+						bgColor : '#FFFFFF',
+						activeBgColor : '#F5F5F5',
+						height : 70.0,
+						imgWidth : 40,
+						imgHeight : 40,
+						imgCorner : 4,
+						placeholderImg : '',
+						titleSize : 16.0,
+						titleColor : '#434343',
+						subTitleSize : 16.0,
+						subTitleColor : '#434343',
+						remarkColor : '#434343',
+						remarkSize : 14,
+						remarkIconWidth : 30
+					}
+				},
+				fixedOn : api.frameName
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.eventType == 'clickContent') {
+						UIListView.getDataByIndex({
+							index : ret.index
+						}, function(ret, err) {
+							if (ret) {
+								var dialogBox = api.require('dialogBox');
+								dialogBox.receipt({
+									rect : {
+										w : 290,
+										h : 360
+									},
+									items : [{
+										key : '起点：' + ret.data.title,
+										value : ''
+									}, {
+										key : '终点：' + ret.data.subTitle,
+										value : ''
+									}, {
+										key : '费用',
+										value : ret.data.fee + '元'
+									}, {
+										key : '下单时间',
+										value : ret.data.ctime
+									}, {
+										key : '接单时间',
+										value : ret.data.remark
+									}, {
+										key : '订单类型',
+										value : ret.data.type
+									}, {
+										key : '支付',
+										value : ret.data.ispay
+									}],
+									texts : {
+										title : '订单详情',
+										cancel : '确定'
+									},
+									styles : {
+										bg : '#FFF',
+										corner : 4,
+										title : {
+											textColor : '#4B4B4B',
+											textSize : 18,
+											marginT : 10
+										},
+										topBorder : {
+											borderColor : '#C0C0C0',
+											borderWidth : 2,
+											marginT : 10
+										},
+										listHeight : 260,
+										item : {
+											textColor : '#4B4B4B',
+											textSize : 14,
+											marginL : 10,
+											marginT : 5,
+											marginB : 5,
+											bgColor : '#FFF'
+										},
+										bottomBorder : {
+											borderColor : '#C0C0C0',
+											borderWidth : 4,
+										},
+										cancel : {
+											textSize : 16,
+											textColor : '#4B4B4B',
+											marginT : 10,
+											highlight : '#696969'
+										}
+									}
+								}, function(ret, err) {
+									if (ret) {
+										dialogBox.close({
+											dialogName : 'alert'
+										});
+									} else {
+										alert(JSON.stringify(err));
+									}
+								});
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+					}
+				} else {
+				}
+			});
+			//追加数据
+			var didValue = $api.getStorage('did');
+			api.ajax({
+				url : 'http://www.chaorenkeji.com/server.php',
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						did : didValue,
+						op : '2'
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.length > 0) {
+						var datas = [];
+						// 数据源.
+						for (var i = 0; i < ret.length; i++) {
+							if (ret[i].start.length > 13) {
+								ret[i].start = ret[i].start.substring(0, 13) + '···';
+							}
+							if (ret[i].end.length > 13) {
+								ret[i].end = ret[i].end.substring(0, 13) + '···';
+							}
+							var data = {
+								uid : ret[i].id,
+								imgPath : '',
+								title : ret[i].start,
+								subTitle : ret[i].end,
+								fee : ret[i].fee,
+								ctime : ret[i].ctime,
+								remark : ret[i].receivetime,
+								ispay : ret[i].ispay,
+								type : ret[i].type
+							};
+							datas.push(data);
+						}
+						UIListView.appendData({
+							data : datas
+						}, function(ret, err) {
+							if (ret) {
+								activity.closeKeyFrame();
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+					} else {
+						activity.closeKeyFrame();
+					}
+				} else {
+					activity.closeKeyFrame();
+					alert(JSON.stringify(err));
+				}
+			});
+		}
+
+		function appendHtml(i) {
+			var html = '<div class="egret-flex-item musiclist-item"><div class="egret-flex-item-abright"><div class="egret-flex-item-shelf pl10"><div class="egret-flex-item-shelf01">休息</div><div class="egret-flex-item-shelf02">3.1M 以莉.高露 - 轻快的生活</div></div><div class="egret-flex-item-arrow"><img src="../../image/musiclist/musiclistmore.png" alt="" class="toobarimg" onclick="expandlist(0, this)"></div></div></div><div class="musiclist-item-tool" ><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info"><img src="../../image/musiclist/musiclisttool01.png" alt=""></div><div class="num">收藏</div></div><div class="userinfocol" tapmode="toolhover" onclick="downloadMusic()"><div class="info"><img src="../../image/musiclist/musiclisttool02.png" alt=""></div><div class="num">下载</div></div><div class="userinfocol" tapmode="toolhover" onclick="openMusiclistshare()"><div class="info"><img src="../../image/musiclist/musiclisttool03.png" alt=""></div><div class="num">分享</div></div><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info"><img src="../../image/musiclist/musiclisttool04.png" alt=""></div><div class="num">歌手</div></div><div class="userinfocol" tapmode="toolhover" onclick=""><div class="info"><img src="../../image/musiclist/musiclisttool05.png" alt=""></div><div class="num">专辑</div></div></div>';
+			$api.append($api.dom("body"), html);
+		}
+
+		function expandlist(clickitem) {
+			var toolbarlist = document.getElementsByClassName('musiclist-item-tool');
+			var toolbarimg = document.getElementsByClassName('toobarimg');
+			var clicktoolitem = clickitem.nextSibling;
+			var click = clicktoolitem.getAttribute("data-click");
+			// 复原其他tool，一次只打开一个tool
+			for (var i = 0; i < toolbarlist.length; i++) {
+				toolbarlist[i].setAttribute("data-click", 0);
+				toolbarlist[i].style.display = 'none';
+				toolbarimg[i].src = "../../image/musiclist/musiclistmore.png";
+			}
+			if (click == 0) {
+				// 点开
+				clicktoolitem.setAttribute("data-click", 1);
+				clickitem.src = "../../image/musiclist/musiclistmore_prs.png";
+				clicktoolitem.style.display = '-webkit-box';
+			} else {
+				// 关闭
+				clicktoolitem.setAttribute("data-click", 0);
+				clickitem.src = "../../image/musiclist/musiclistmore.png";
+				clicktoolitem.style.display = 'none';
+			}
+		}
+
+		apiready = function() {
+			var site = api.loadSecureValue({
+				sync : true,
+				key : 'site'
+			});
+			siteUrl = site + '/server.php';
+			var didValue = $api.getStorage('did');
+			if ( typeof (didValue) == 'undefined') {
+				return false;
+			}
+			var wxVoicePlus = api.require('wxVoicePlus');
+			wxVoicePlus.speechSynthesizerConfiguration({
+				appId : 'wx9c4fac1030c9fde0'
+			});
+			var goodsList = api.require('goodsList');
+			var datas = [];
+			goodsList.open({
+				x : 0, // 横坐标, 默认 0.
+				y : 0, // 纵坐标, 默认 0.
+				w : api.frameWidth, // 宽度, 默认设备屏幕宽度.
+				h : api.frameHeight, // 高度, 默认 视图高度 + 100.
+				itemSlipDistance : 0,
+				datas : datas,
+				itemStyle : {
+					borderColor : '#d9d2e9',
+					interval : 0,
+					titleSize : 17, //（可选项）标题字体大小，数字类型，默认16
+					titleColor : '#4e4949', //（可选项）标题字体颜色，支持 rgb,rgba,#，默认：#000000
+					subTitleSize : 17, //（可选项）子标题字体大小，数字类型，默认13
+					subTitleColor : '#4e4949', //（可选项）子标题字体颜色，支持 rgb,rgba,#，默认：#696969
+					markSize : 15, //（可选项）小标题字体大小，数字类型，默认13
+					markColor : '#706b6b', //（可选项）小标题字体颜色，支持 rgb,rgba,#，默认：#ff0000
+					tagColor : '#ffffff',
+					rightBgColor : '#ffffff',
+					tagBg : '#7b7676',
+					tagSize : '15',
+					bgColor : '#ffffff',
+					tagHeight : 30,
+					height : 90,
+					avatarH : 85,
+					avatarW : 80
+				},
+				fixedOn : 'second_frame_disclist_body'
+			}, function(ret, err) {
+				if (ret) {
+					var index = ret.index;
+					var id = ret.data.poid;
+					var img = ret.data.img;
+					var start = ret.data.title;
+					var end = ret.data.subTitle;
+					var gotime = ret.data.gotime;
+					var people = ret.data.tag;
+					var slat = ret.data.slat;
+					var slng = ret.data.slng;
+					var elat = ret.data.elat;
+					var elng = ret.data.elng;
+					var sdistrict = ret.data.sdistrict;
+					if (sdistrict == null)
+						sdistrict = '';
+					var edistrict = ret.data.edistrict;
+					if (edistrict == null)
+						edistrict = '';
+					var mobile = ret.data.mobile;
+					var type = ret.data.type;
+					var jname = ret.data.jname;
+					var sname = ret.data.sname;
+					var stel = ret.data.stel;
+					var dialogBox = api.require('dialogBox');
+					//计算司机到乘客之间的距离
+					var lonPassenger = null;
+					var latPassenger = null;
+					var map = api.require('bMap');
+					//已抢单或者未抢单
+					if(people == '进行中'){
+					 		api.openWin({
+							name : 'yarrive_user',
+							url : './yarrive_user.html',
+							pageParam : {
+								id : ret.data.poid
+							},
+							animation : {
+								type : "fade", //动画类型（详见动画类型常量）
+								subType : "", //动画子类型（详见动画子类型常量）
+								duration : 300 //动画过渡时间，默认300毫秒
+							},
+							delay : 200
+						});
+					
+					}else{
+						map.transCoords({//转换经纬度
+						type : "common",
+						lon : slng,
+						lat : slat,
+						mcode : '0B:07:B0:15:A7:37:E7:FD:B8:78:F6:A1:06:FC:75:44:A4:8A:A7:B4;com.dududache.xmb'
+					}, function(ret, err) {
+						lonPassenger = ret.lon;
+						latPassenger = ret.lat;
+						map.getLocation({
+							accuracy : '10m',
+							autoStop : true,
+							filter : 1
+						}, function(ret, err) {
+							if (ret.status) {
+								map.getDistance({
+									start : {
+										lon : ret.lon,
+										lat : ret.lat
+									},
+									end : {
+										lon : lonPassenger,
+										lat : latPassenger
+									}
+								}, function(ret) {
+									if (ret.status) {
+										distance = (ret.distance / 1000).toFixed(1);
+										tip = distance.toString();
+										dialogBox.alert({
+											texts : {
+												title : '提示',
+												content : '距离您当前位置直线距离 ' + tip + ' 公里(非实际开车距离，仅供参考!)\n\n' + sdistrict + '--' + edistrict,
+												leftBtnTitle : '再看看',
+												rightBtnTitle : '确认接单'
+											},
+											styles : {
+												bg : '#fff',
+												w : 300,
+												title : {
+													marginT : 20,
+													icon : 'widget://res/gou.png',
+													iconSize : 40,
+													titleSize : 16,
+													titleColor : '#000'
+												},
+												content : {
+													color : '#000',
+													size : 16
+												},
+												left : {
+													marginB : 7,
+													marginL : 20,
+													w : 130,
+													h : 35,
+													corner : 2,
+													bg : '#fff',
+													color : '#615a5a',
+													size : 18
+												},
+												right : {
+													marginB : 7,
+													marginL : 10,
+													w : 130,
+													h : 35,
+													corner : 2,
+													bg : '#fff',
+													color : '#05a0f5',
+													size : 18
+												}
+											}
+										}, function(ret) {
+											if (ret.eventType == 'left') {
+												dialogBox.close({
+													dialogName : 'alert'
+												});
+											} else {
+												//更新服务器
+												dialogBox.close({
+													dialogName : 'alert'
+												});
+												var didNum = $api.getStorage('did');
+												api.ajax({
+													url : siteUrl,
+													method : 'post',
+													timeout : 30,
+													dataType : 'json',
+													returnAll : false,
+													data : {
+														values : {
+															yoid : id,
+															status : 1,
+															did : didNum,
+															op : 22
+														}
+													}
+												}, function(ret, err) {
+													if (ret) {
+														if (ret.data == 0) {
+															api.toast({
+																msg : '已派给其他司机',
+																duration : 2000,
+																location : 'bottom'
+															});
+															goodsList.deleteItem({
+																index : index
+															});
+														} else if (ret.data == 1) {
+															api.imageCache({
+																url : img
+															}, function(ret, err) {
+																var url = ret.url;
+																var db = api.require('db');
+																people = '进行中';
+																var sqlInsert = "insert into DataYuYue(Id,Img,Start,End,Gotime,People,Slat,Slng,Elat,Elng,Mobile,Type,Sname,Jname,Stel,Status) values('" + id + "','" + url + "','" + start + "','" + end + "','" + gotime + "','" + people + "','" + slat + "','" + slng + "','" + elat + "','" + elng + "','" + mobile + "','" + type + "','" + jname + "','" + sname + "','" + stel + "','" + '1' + "');"
+																db.executeSql({
+																	name : 'order',
+																	sql : sqlInsert
+																}, function(ret, err) {
+																	if (ret.status) {
+																		api.toast({
+																			msg : '已加入您的订单列表',
+																			duration : 2000,
+																			location : 'bottom'
+																		});
+																		goodsList.deleteItem({
+																			index : index
+																		});
+																		api.sendEvent({
+																			name : 'yuyue',
+																			extra : content
+																			});
+																		} else {
+																		api.alert({
+																			msg : err.msg + id
+																		});
+																	}
+																});
+															});
+														} else {
+															api.toast({
+																msg : '抢单失败',
+																duration : 2000,
+																location : 'bottom'
+															});
+														}
+													} else {
+														api.alert({
+															msg : JSON.stringify(err)
+														});
+													}
+												});
+											}
+										});
+									}
+								});
+							} else {
+								//alert(err.code);
+							}
+						});
+					});
+					}
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+			//加载数据
+			api.addEventListener({
+				name : 'yuyue'
+			}, function(ret, err) {
+				var content = ret.value;
+				if(content['type']=='view_yuyue'){
+				 var readmsg = '预约单 ' + content['gotime'] + content['address'] + '去往' + content['end'];
+
+				}
+				wxVoicePlus.startSpeechSynthesizer({
+					text : readmsg
+				}, function(ret) {
+					if (ret) {
+						//alert(JSON.stringify(ret));
+					}
+				});
+				var db = api.require('db');
+				var sql = "select * from DataYuYue;";
+				db.selectSql({
+					name : 'order',
+					sql : sql
+				}, function(ret, err) {
+					if (ret.status) {
+						var datas = [];
+						if (ret.data.length > 0) {
+							for (var i = 0; i < ret.data.length; i++) {
+								var data = {
+									poid : ret.data[i].Id,
+									img : ret.data[i].Img, // 头像图片路径,支持本地和网络路径
+									title : ret.data[i].Start, // 标题.
+									subTitle : ret.data[i].End, // 子标题.
+									gotime : ret.data[i].Gotime,
+									mark : ret.data[i].Gotime,
+									tag : ret.data[i].People,
+									rightBtn : [{
+										bg : '#dbd8d8', //按钮背景色，支持 rgb，rgba，#，默认#ee8262.
+										width : 10,
+										title : '取消订单', //按钮名字，字符串类型，默认‘按钮’
+										titleSize : 15, //按钮标题大小，默认12
+										titleColor : '#434343', // 按钮标题颜色，支持 rgb，rgba，#，默认#ffffff
+										selectedColor : '#434343', //按钮选中时候的颜色值,支持 rgb，rgba，#
+										icon : ''
+									}] // 左滑单元格露出的按钮组.
+								};
+								datas.push(data);
+							}
+							//加载未抢单数据
+							var uniacidValue = $api.getStorage('uniacid');
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										did : didValue,
+										uniacid : uniacidValue,
+										op : '21'
+									}
+								}
+							}, function(ret, err) {
+								if (ret) {
+									if (ret.length > 0) {
+										for (var i = 0; i < ret.length; i++) {
+											var data = {
+												poid : ret[i].id,
+												img : ret[i].avatar, // 头像图片路径,支持本地和网络路径
+												title : ret[i].start, // 标题.
+												subTitle : ret[i].end, // 子标题.
+												gotime : ret[i].gotime,
+												mark : ret[i].gotime,
+												tag : ret[i].people,
+												slat : ret[i].slat,
+												slng : ret[i].slng,
+												elat : ret[i].elat,
+												elng : ret[i].elng,
+												sdistrict : ret[i].start_district,
+												edistrict : ret[i].end_district,
+												mobile : ret[i].mobile,
+												type : ret[i].type,
+												jname : ret[i].jname,
+												sname : ret[i].sname,
+												stel : ret[i].stel,
+												rightBtn : [] // 左滑单元格露出的按钮组.
+											};
+											datas.push(data);
+										}
+										document.getElementsByClassName("norecord")[0].style.display = "none";
+										goodsList.reloadData({
+											datas : datas
+										});
+									} else {
+										document.getElementsByClassName("norecord")[0].style.display = "none";
+										goodsList.reloadData({
+											datas : datas
+										});
+									}
+								} else {
+									alert('网络链接失败，请检查网络');
+								}
+							});
+						} else {
+							//加载未抢单数据
+							var uniacidValue = $api.getStorage('uniacid');
+							api.ajax({
+								url : siteUrl,
+								method : 'post',
+								timeout : 30,
+								dataType : 'json',
+								returnAll : false,
+								data : {
+									values : {
+										did : didValue,
+										uniacid : uniacidValue,
+										op : '21'
+									}
+								}
+							}, function(ret, err) {
+								if (ret) {
+									if (ret.length > 0) {
+										for (var i = 0; i < ret.length; i++) {
+											var data = {
+												poid : ret[i].id,
+												img : ret[i].avatar, // 头像图片路径,支持本地和网络路径
+												title : ret[i].start, // 标题.
+												subTitle : ret[i].end, // 子标题.
+												gotime : ret[i].gotime,
+												mark : ret[i].gotime,
+												tag : ret[i].people,
+												slat : ret[i].slat,
+												slng : ret[i].slng,
+												elat : ret[i].elat,
+												elng : ret[i].elng,
+												sdistrict : ret[i].start_district,
+												edistrict : ret[i].end_district,
+												mobile : ret[i].mobile,
+												type : ret[i].type,
+												jname : ret[i].jname,
+												sname : ret[i].sname,
+												stel : ret[i].stel,
+												rightBtn : [] // 左滑单元格露出的按钮组.
+											};
+											datas.push(data);
+										}
+										document.getElementsByClassName("norecord")[0].style.display = "none";
+										goodsList.reloadData({
+											datas : datas
+										});
+									} else {
+										//activity.closeKeyFrame();
+									}
+								} else {
+									alert('网络链接失败，请检查网络');
+								}
+							});
+						}
+					}
+				});
+			});
+			//下拉刷新
+			var loadingImgae = 'widget://res/goodsList_arrow.png';
+			//刷新的小箭头
+			var bgColor = '#F5F5F5';
+			//下拉刷新的背景颜色，有默认值，可为空
+			var textColor = '#8E8E8E';
+			//提示语颜色，有默认值，可为空
+			var textDown = '已经刷新..';
+			//尚未触发刷新时间的提示语，有默认值，可为空
+			var textUp = '松开开始刷新...';
+			//触发刷新事件的提示语，有默认值，可为空
+			var showTime = true;
+			//是否显示时间，有默认值，可为空
+			
+		}
+	</script>
+</html>

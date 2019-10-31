@@ -1,0 +1,1264 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>打车云端</title>
+		<link rel="stylesheet" type="text/css" href="./css/api.css" />
+		<link rel="stylesheet" type="text/css" href="./css/common.css" />
+		<style>
+			/* 头部样式 */
+			#firstHeader {
+				background-color: #05a0f5;
+			}
+			#secHeader {
+				background-color: #05a0f5;
+			}
+			#thridHeader {
+				background-color: #05a0f5;
+			}
+			#fortheader {
+				background-color: #05a0f5;
+			}
+			#topStatus {
+				color: #05a0f6;
+			}
+			.topbar {
+				background: #05a0f5;
+				height: 50px;
+				border-bottom: 1px solid #DDDFE3;
+				position: relative;
+			}
+			.topbar_title {
+				display: inline-block;
+				font-size: 20px;
+				line-height: 50px;
+				padding-left: 12px;
+			}
+			.hr01, .hr02 {
+				height: 28px;
+			}
+			.headerico {
+				padding: 11px 15px 11px 15px;
+			}
+			.headericohover {
+				background: #DADDE0;
+			}
+			.fr {
+				float: right;
+			}
+			.fl {
+				float: left;
+			}
+			.pa {
+				position: absolute;
+			}
+			img {
+				vertical-align: top;
+			}
+			/*第一头部*/
+			.egret-header-box {
+				height: 50px;
+			}
+			.egret-img img {
+				height: 30px;
+				padding: 10px;
+			}
+			.egret-header-search {
+				background-color: #fff;
+				position: absolute;
+				left: 60px;
+				right: 20px;
+				height: 34px;
+				margin-top: 8px;
+				border-radius: 4px;
+			}
+			.egret-header-search img {
+				margin-left: 30px;
+				height: 20px;
+				margin-top: 7px;
+			}
+			.egret-header-search input {
+				line-height: 24px;
+				font-size: 14px;
+				padding-top: 5px;
+			}
+			.egret-header-search input:focus {/*border:0;*/
+				outline: none;
+			}
+			/* 第二头部 */
+			.egret-header-text {
+				line-height: 50px;
+				color: #fff;
+				font-size: 16px;
+				padding: 0 10px;
+			}
+			.egret-header-title {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				line-height: 50px;
+				color: #fff;
+				font-size: 20px;
+			}
+			/* 第三头部 */
+			.egret-switchframe {
+				position: absolute;
+				left: 90px;
+				right: 90px;
+				background-color: #fcfcfc;
+				text-align: center;
+				height: 30px;
+				line-height: 30px;
+				bottom: 10px;
+				border-radius: 4px;
+				color: #fff;
+				border: 1px solid #fff;
+			}
+			.egret-switchframe div {
+				width: 50%;
+				display: inline-block;
+				color: #fff;
+				background-color: #05a0f5;
+			}
+			.egret-switchframe div:first-child {
+				border-radius: 4px 0 0 4px;
+			}
+			.egret-switchframe div:last-child {
+				border-radius: 0px 4px 4px 0px;
+			}
+			.egret-switchframe-selectswitch {
+				background-color: #fff !important;
+				color: #05a0f5 !important;
+			}
+			/* 头部切换样式 */
+			.titlebar {
+				display: none;
+			}
+			.activebar {
+				display: block;
+			}
+			/* 底部切换按钮样式 */
+			ul {
+				display: -webkit-box;
+				display: -webkit-flex;
+				display: flex;
+			}
+			#footer {
+				height: 51px; /*line-height: 50px;*/
+				background-color: #413A36;
+				border-top: 1px solid #332E2A;
+			}
+			#footer li {
+				-webkit-box-flex: 1;
+				-webkit-flex: 2;
+				flex: 2; /*height: 40px;*/
+			}
+			/* 选项卡样式 */
+			.scrollbar {
+				display: -webkit-box;
+				display: -webkit-flex;
+				text-align: center;
+				height: 40px;
+				line-height: 40px;
+				background: #EBECF0;
+				font-size: 12px;
+				position: relative;
+			}
+			.col1 {
+				-webkit-box-flex: 1;
+				-webkit-flex: 1;
+				flex: 1;
+				color: #909090;
+			}
+			.indexbar {
+				position: absolute;/*background: #0fc;*/
+				width: 50%;
+				height: 5px;
+				left: 0px;
+				bottom: 0px;
+				-webkit-transition: 300ms;
+			}
+			.redbox {
+				background: #DB4646;
+				width: 40px;
+				height: 5px;
+				position: relative;
+				left: auto;
+				right: auto;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			/********************/
+			/* 底部按钮原始样式 */
+			/********************/
+			.bbtn01 {
+				background: url(./image/main_index01.png) no-repeat center 4px;
+			}
+			.bbtn02 {
+				background: url(./image/main_index02.png) no-repeat center 4px;
+			}
+			.bbtn03 {
+				background: url(./image/main_index03.png) no-repeat center 4px;
+			}
+			.bbtn04 {
+				background: url(./image/main_index04.png) no-repeat center 4px;
+			}
+			.bottom_btn {
+				width: 99%; /*height: 43px;*/
+				padding-top: 21px;
+				background-position-y: 4px;
+				background-size: 24px;
+				font-size: 13px;
+				color: #A5A5A5;
+			}
+			/* 底部按钮激活样式 */
+			.activebtn0 {/*background: url(./image/main_index01pressed.png) no-repeat center 4px; */
+			}
+			.activebtn1 {/*background: url(./image/main_index02pressed.png) no-repeat center 4px; */
+			}
+			.activebtn2 {/*background: url(./image/main_index03pressed.png) no-repeat center 4px; */
+			}
+			.activebtn3 {/*background: url(./image/main_index04pressed.png) no-repeat center 4px; */
+			}
+			.activebtn {
+				color: #fff;
+				background-size: 24px;
+				background-color: #05a0f6;
+			}
+			.bottomhover {
+				background-color: #46494B;
+			}
+			/* 本地刷新图标 */
+			#localrefresh {
+				display: none;
+				float: right;
+				width: 40px;
+				padding: 5px 10px;
+			}
+			.navbar {
+				display: -webkit-box;
+				-webkit-box-orient: horizontal;
+				position: relative;
+				height: 40px;
+				box-sizing: border-box;
+				background: #fff;
+				border-bottom: 1px solid #e0e0e0;
+			}
+			.navbar-item {
+				display: block;
+				-webkit-box-flex: 1;
+				width: 100%;
+				line-height: 40px;
+				font-size: 16px;
+				text-align: center;
+				color: #000;
+			}
+			.navbar-item-hov {
+				background-color: rgba(254,242,228,0.7);
+			}
+			.navbar-item-active {
+				color: #05a0f5;
+			}
+			#navmark {
+				position: absolute;
+				left: 0px;
+				bottom: 0px;
+				-webkit-transition: 300ms;
+				text-align: center;
+				height: 2px;
+				background-color: #05a0f5;
+			}
+			/*上下线开关*/
+			section {
+				float: left;
+			}
+			.checkbox {
+				position: relative;
+				display: inline-block;
+			}
+			.checkbox:after, .checkbox:before {
+				font-family: FontAwesome;
+				-webkit-font-feature-settings: normal;
+				-moz-font-feature-settings: normal;
+				font-feature-settings: normal;
+				-webkit-font-kerning: auto;
+				-moz-font-kerning: auto;
+				font-kerning: auto;
+				-webkit-font-language-override: normal;
+				-moz-font-language-override: normal;
+				font-language-override: normal;
+				font-stretch: normal;
+				font-style: normal;
+				font-synthesis: weight style;
+				font-variant: normal;
+				font-weight: normal;
+				text-rendering: auto;
+			}
+			.checkbox label {
+				width: 90px;
+				height: 42px;
+				background: #ccc;
+				position: relative;
+				display: inline-block;
+				border-radius: 46px;
+				-webkit-transition: 0.4s;
+				transition: 0.4s;
+			}
+			.checkbox label:after {
+				content: '';
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				border-radius: 100%;
+				left: 0;
+				top: -5px;
+				z-index: 2;
+				background: #fff;
+				box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+				-webkit-transition: 0.4s;
+				transition: 0.4s;
+			}
+			.checkbox input {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 5;
+				opacity: 0;
+				cursor: pointer;
+			}
+			.checkbox input:hover + label:after {
+				box-shadow: 0 2px 15px 0 rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
+			}
+			.checkbox input:checked + label:after {
+				left: 40px;
+			}
+			.model-12 {
+				background-color: #FFFFFF;
+				position: absolute;
+				left: 30%;
+				width: 163px;
+				height: 30px;
+				bottom: 10px;
+				line-height: 30px;
+				border-radius: 50px;
+				border: 1px solid #fff;
+			}
+			.model-12 .checkbox {
+				background: #05a0f5;
+				height: 30px;
+				width: 163;
+				min-width: 163px;
+				border-radius: 50px;
+			}
+			.model-12 .checkbox:after, .model-12 .checkbox:before {
+				color: #fff;
+				margin-left: 0px;
+				content: '上线';
+				font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+				line-height: 30px;
+				font-size: 12px;
+			}
+			.model-12 .checkbox:before {
+				margin-left: 10px;
+				content: '下线';
+				z-index: 1;
+			}
+			.model-12 .checkbox label {
+				background: #1E1E1E;
+				height: 10px;
+				width: 70px;
+				margin: 0 5px;
+				box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.3) inset;
+			}
+			.model-12 .checkbox label:after {
+				background-color: #3F4545;
+				background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzY2NjY2NiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzNmNDU0NSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+				background-size: 100%;
+				background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #666666), color-stop(100%, #3f4545));
+				background-image: -webkit-linear-gradient(top, #666666 0%, #3f4545 100%);
+				background-image: linear-gradient(to bottom, #666666 0%, #3f4545 100%);
+				top: -9px;
+				width: 27px;
+				height: 27px;
+			}
+			.model-12 .checkbox label:before {
+				content: '';
+				position: absolute;
+				width: 14px;
+				height: 14px;
+				border-radius: 100%;
+				-webkit-transition: 0.4s;
+				transition: 0.4s;
+				background: #151515;
+				z-index: 3;
+				left: 7px;
+				top: -2px;
+			}
+			.model-12 .checkbox input:checked + label:after {
+				left: 45px;
+			}
+			.model-12 .checkbox input:checked + label:before {
+				background: #94DA00;
+				box-shadow: 0 0 5px #94DA00;
+				left: 52px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrap">
+			<!-- 第一头部 -->
+			<div id="firstHeader" class="titlebar activebar">
+				<div class="egret-header topbar normalHeader">
+					<!--div class="egret-header-box egret-img fl" onclick="openfindmusic()"><img src="./image/shutdown.png" alt=""></div-->
+					<section class="model-12">
+						<div class="checkbox">
+							<input type="checkbox" onclick='online(this)' id = "onl"/>
+							<label></label>
+						</div>
+					</section>
+				</div>
+				<nav class="navbar" id="firstHeaderIndex">
+					<a id="navbar-item-recommend" class="navbar-item navbar-item-active" tapmode="navbar-item-hov" onclick="setFrameGroupIndex(0);">QHD</a>
+					<a id="navbar-item-rank" class="navbar-item" tapmode="navbar-item-hov" onclick="setFrameGroupIndex(1);">SEA</a>
+					<a id="navbar-item-favorite" class="navbar-item" tapmode="navbar-item-hov" onclick="setFrameGroupIndex(2);">WD</a>
+					<a id="navbar-item-ranklist" class="navbar-item" tapmode="navbar-item-hov" onclick="setFrameGroupIndex(3);">SEEU</a>
+					<mark id="navmark"></mark>
+				</nav>
+			</div>
+			<!-- 第二头部 -->
+			<div id="secHeader" class="titlebar">
+				<div class="egret-header topbar">
+					<div class="egret-switchframe">
+						<div class="egret-switchframe-leftbtn egret-switchframe-selectswitch" onclick="setFirstFramegroupIndex(0)">抢单大厅</div><div class="egret-switchframe-rightbtn" onclick="setFirstFramegroupIndex(1)">我的订单</div>
+					</div>
+					<div  class="egret-img"><img src="./image/frame03cover/cm2_top_icn_invite_prs.png" alt="" onclick="switchframe('forth_frame')" >
+					</div>
+				</div>
+			</div>
+			<!-- 第三头部 -->
+			<div id="thridHeader" class="titlebar">
+				<div class="egret-header topbar">
+					<div class="egret-switchframe">
+						<div class="egret-switchframe-leftbtn egret-switchframe-selectswitch" onclick="setSecondFramegroupIndex(0)">订单列表</div><div class="egret-switchframe-rightbtn" onclick="setSecondFramegroupIndex(1)">我的订单</div></div>
+					<div  class="egret-img"><img src="./image/frame03cover/cm2_top_icn_invite_prs.png" alt="" onclick="switchframe('forth_frame')" >
+					</div>
+				</div>
+			</div>
+			<!-- 第四头部 -->
+			<div id="fortheader" class="titlebar">
+				<div class="egret-header topbar">
+					<div class="egret-header-title">
+						账号
+					</div>
+				</div>
+			</div>
+			<div id="main"></div>
+			<div id="footer">
+				<ul>
+					<li tapmode="activebtn0 activebtn" onclick="switchframe('home_frame')">
+						<a class="bottom_btn bbtn01 weixin activebtn activebtn0">首页</a>
+					</li>
+					<li tapmode="activebtn1 activebtn" onclick="switchframe('second_frame')">
+						<a class="bottom_btn bbtn02 communicate">实时单</a>
+					</li>
+					<li tapmode="activebtn2 activebtn" onclick="switchframe('third_frame')">
+						<a class="bottom_btn bbtn03 discover">拼车单</a>
+					</li>
+					<li tapmode="activebtn3 activebtn" onclick="switchframe('forth_frame')">
+						<a class="bottom_btn bbtn04 home">我</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="./script/api.js"></script>
+	<script type="text/javascript">
+		var firstHeader = $api.byId('firstHeader');
+		var secHeader = $api.byId('secHeader');
+		var thirdHeader = $api.byId('thridHeader');
+		var fortheader = $api.byId('fortheader');
+		var firstHeaderOffset;
+		var firstHeaderIndexHeight;
+		var main = $api.byId('main');
+		var mainPos = $api.offset(main);
+		var footer = $api.byId('footer');
+		var footerPos = $api.offset(footer);
+		var isFirstOpen = false;
+		var isSecondOpen = false;
+		var isThirdOpen = false;
+		var isForthOpen = false;
+		//上线下线
+		function online(on) {
+			var push = api.require('push');
+			var uniacid = $api.getStorage('uniacid');
+			var didValue = $api.getStorage('did');
+			if (on.checked) {
+				var alias = $api.getStorage('alias');
+				 if(alias!=1){
+					var mipush = api.require('mipush');
+					mipush.registerPush({
+    					appId: '2882303761517554522',
+    					appKey: '5851755464522'
+						},function(ret) {
+						if (ret.status) {
+							var phone = $api.getStorage('phone');
+							var param = {
+								alias : phone
+							};
+							api.showProgress({
+								style : 'default',
+								animationType : 'zoom',
+								title : '正在连接',
+								text : '请稍候',
+								modal : true
+					   });
+							mipush.setAlias(param, function(ret) {
+								var status = ret.status;
+								if (status != true) {
+								    api.showProgress({
+								    style : 'default',
+								    animationType : 'zoom',
+								    title : '连接失败',
+								    text : '请重试',
+								    modal : true
+					           });
+
+									api.rebootApp();
+								} else {
+								         api.hideProgress();
+								         $api.setStorage('alias', 1);
+								 		mipush.getRegId(function(ret) {
+    									var registrationId = ret.regId;
+    									driverStatus(1,didValue,registrationId);
+											});
+									//driverStatus(1,didValue);
+								}
+							});
+							
+						}
+					});
+					}else{
+					 	mipush.resumePush(function(ret) {
+       						driverStatus(1,didValue);
+    						});
+						}
+			} else {
+				//更新服务器司机状态
+				driverStatus(0,didValue);
+			}
+		}
+
+		function driverStatus(status, didValue, registrationId) {//更新司机状态
+			api.ajax({
+				url : siteUrl,
+				method : 'post',
+				timeout : 30,
+				dataType : 'json',
+				returnAll : false,
+				data : {
+					values : {
+						did : didValue,
+						on : status,
+						rid :registrationId,
+						op : 9
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (status) {
+						//上线
+						api.setPrefs({
+							key : 'onLine',
+							value : '1'
+						});
+						api.toast({
+							msg : '上线成功',
+							duration : 2000,
+							location : 'bottom'
+						});
+					} else {//下线
+						api.setPrefs({
+							key : 'onLine',
+							value : '0'
+						});
+						api.toast({
+							msg : '下线成功',
+							duration : 2000,
+							location : 'bottom'
+						});
+					}
+				} else {
+					alert('网络连接失败，请检查网络');
+				}
+			});
+		}
+
+		function emptyopt() {
+		}
+
+		// 打开frame
+		function openframe02more() {
+			api.openFrame({
+				name : 'frame02more',
+				url : './html/second_frame/frame02_more.html',
+				rect : {
+					x : 0,
+					y : firstHeaderOffset.h,
+					w : 'auto',
+					h : 'auto'
+				},
+				bounces : true,
+				delay : 200
+			});
+		}
+
+		function openLeftgroup() {
+			// var footer = $api.byId('footer');
+			// var footerPos = $api.offset(footer);
+			var thridHeader = document.getElementById('thridHeader');
+			var thridHeader = $api.offset(thridHeader);
+			// 清除右部class
+			var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[0];
+			var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[0];
+			// 注意，类名的前面有一个空格
+			rightbtn.className = 'egret-switchframe-rightbtn';
+			leftbtn.className = 'egret-switchframe-leftbtn egret-switchframe-selectswitch';
+			api.openFrame({
+				name : 'frame0301',
+				url : './html/third_frame/frame0301.html',
+				rect : {
+					x : 0,
+					y : thridHeader.h,
+					w : 'auto',
+					h : (api.frameHeight - footerPos.h - thridHeader.h)
+				},
+				bounces : false,
+				delay : 200
+			});
+		}
+
+		function openRightgroup() {
+			// var footer = $api.byId('footer');
+			// var footerPos = $api.offset(footer);
+			var thridHeader = document.getElementById('thridHeader');
+			var thridHeader = $api.offset(thridHeader);
+			// 清除左部class
+			var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[0];
+			var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[0];
+			rightbtn.className = 'egret-switchframe-rightbtn egret-switchframe-selectswitch';
+			leftbtn.className = 'egret-switchframe-leftbtn';
+			api.openFrame({
+				name : 'frame0302',
+				url : './html/third_frame/frame0302.html',
+				rect : {
+					x : 0,
+					y : thridHeader.h,
+					w : 'auto',
+					h : (api.frameHeight - footerPos.h - thridHeader.h)
+				},
+				bounces : false,
+				delay : 200
+			});
+		}
+
+		function login() {
+			api.openFrame({
+				name : 'login',
+				url : './html/login.html',
+				rect : {
+					x : 0,
+					y : 0,
+					w : 'auto',
+					h : 'auto'
+				},
+				bounces : false,
+				delay : 200
+			});
+		}
+
+		function openNewWindow(type) {
+			api.openWin({
+				name : type,
+				url : './html/' + type + '.html',
+				pageParam : {},
+				bounces : false,
+				opaque : false
+			});
+		}
+
+		function openSearch() {
+			api.openWin({
+				name : 'search',
+				url : './html/search.html',
+				bounces : false,
+				delay : 200
+			});
+		}
+
+		function openfindmusic() {
+			 api.closeWidget({
+   			 id: 'A6901764342505',
+    			animation: {
+       			 type: 'flip',
+       			 subType: 'from_bottom',
+       			 duration: 500
+    			}
+			});
+		}
+
+		// 随意切换按钮
+		function randomSwitchBtn(name, index) {
+			var lis = $api.domAll('.bottom_btn');
+			var i = 0, len = lis.length;
+			var curLi = lis[index];
+			for (i; i < len; i++) {
+				var thisLi = lis[i];
+				if (thisLi === curLi) {
+					$api.addCls(thisLi, 'activebtn');
+					$api.addCls(thisLi, 'activebtn' + index);
+					continue;
+				} else {
+					if ($api.hasCls(thisLi, 'activebtn')) {
+						$api.removeCls(thisLi, 'activebtn');
+						$api.removeCls(thisLi, 'activebtn' + i);
+					}
+				}
+			}
+			// 切换头部
+			var lis = $api.domAll('.titlebar');
+			var i = 0, len = lis.length;
+			var curLi = lis[index];
+			for (i; i < len; i++) {
+				var thisLi = lis[i];
+				if (thisLi === curLi) {
+					$api.addCls(thisLi, 'activebar');
+					$api.addCls(thisLi, 'activebar' + index);
+					continue;
+				} else {
+					if ($api.hasCls(thisLi, 'activebar')) {
+						$api.removeCls(thisLi, 'activebar');
+						$api.removeCls(thisLi, 'activebar' + i);
+					}
+				}
+			}
+		}
+
+		// 隐藏所有的一级frame
+		function hideAllFrame() {
+			// api.setFrameAttr({
+			//     name: 'first_frame',
+			//     hidden:true
+			// });
+			api.setFrameAttr({
+				name : 'second_frame',
+				hidden : true
+			});
+			api.setFrameAttr({
+				name : 'home_frame',
+				hidden : true
+			});
+			// api.setFrameAttr({
+			//     name: 'third_frame',
+			//     hidden: true
+			// });
+			api.setFrameGroupAttr({
+				name : 'framegroup01',
+				hidden : true
+			});
+			api.setFrameGroupAttr({
+				name : 'framegroup02',
+				hidden : true
+			});
+			api.setFrameAttr({
+				name : 'forth_frame',
+				hidden : true
+			});
+			// api.setFrameAttr({
+			//     name: 'frame0301',
+			//     hidden: true
+			// });
+			// api.setFrameAttr({
+			//     name: 'frame0302',
+			//     hidden: true
+			// });
+		}
+
+		// 自己修复ios显示frame的时候bug
+		// ios自己主动隐藏后，再open就不显示了
+		function showgroup(type) {
+			api.setFrameGroupAttr({
+				name : type,
+				hidden : false
+			});
+		}
+
+		// 展示指定的frame
+		function showframe(type) {
+			api.setFrameAttr({
+				name : type,
+				hidden : false
+			});
+		}
+
+		function setFrameGroupIndex(frameIndex) {
+			api.setFrameGroupIndex({
+				name : 'framegroup01',
+				index : frameIndex,
+				scroll : true
+			});
+		}
+
+		function setFrameGroupStatus(frameIndex) {
+			switch (frameIndex) {
+				case 0: {
+					$api.byId('navbar-item-recommend').className = "navbar-item navbar-item-active";
+					$api.byId('navbar-item-rank').className = "navbar-item";
+					$api.byId('navbar-item-favorite').className = "navbar-item";
+					$api.byId('navbar-item-ranklist').className = "navbar-item";
+					var num = (api.winWidth / 4) * frameIndex;
+					$api.css($api.byId('navmark'), "-webkit-transform:translate(" + num + "px,0)");
+					break;
+				}
+				case 1: {
+					$api.byId('navbar-item-recommend').className = "navbar-item";
+					$api.byId('navbar-item-rank').className = "navbar-item navbar-item-active";
+					$api.byId('navbar-item-favorite').className = "navbar-item";
+					$api.byId('navbar-item-ranklist').className = "navbar-item";
+					var num = (api.winWidth / 4) * frameIndex;
+					$api.css($api.byId('navmark'), "-webkit-transform:translate(" + num + "px,0)");
+					break;
+				}
+				case 2: {
+					$api.byId('navbar-item-recommend').className = "navbar-item";
+					$api.byId('navbar-item-rank').className = "navbar-item";
+					$api.byId('navbar-item-favorite').className = "navbar-item navbar-item-active";
+					$api.byId('navbar-item-ranklist').className = "navbar-item";
+					var num = (api.winWidth / 4) * frameIndex;
+					$api.css($api.byId('navmark'), "-webkit-transform:translate(" + num + "px,0)");
+					break;
+				}
+				case 3: {
+					$api.byId('navbar-item-recommend').className = "navbar-item";
+					$api.byId('navbar-item-rank').className = "navbar-item";
+					$api.byId('navbar-item-favorite').className = "navbar-item";
+					$api.byId('navbar-item-ranklist').className = "navbar-item navbar-item-active";
+					var num = (api.winWidth / 4) * frameIndex;
+					$api.css($api.byId('navmark'), "-webkit-transform:translate(" + num + "px,0)");
+					break;
+				}
+				default:
+					break;
+			}
+		}
+
+		// -----------------------------------
+		// 第一个framegroup
+		// -----------------------------------
+		function setFirstFramegroupIndex(frameIndex) {
+			if (frameIndex === 0) {
+				var secHeader = document.getElementById('secHeader');
+				var secHeader = $api.offset(secHeader);
+				// 清除右部class
+				var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[0];
+				var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[0];
+				// 注意，类名的前面有一个空格
+				rightbtn.className = 'egret-switchframe-rightbtn';
+				leftbtn.className = 'egret-switchframe-leftbtn egret-switchframe-selectswitch';
+			} else {
+				var secHeader = document.getElementById('secHeader');
+				var secHeader = $api.offset(secHeader);
+				// 清除左部class
+				var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[0];
+				var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[0];
+				rightbtn.className = 'egret-switchframe-rightbtn egret-switchframe-selectswitch';
+				leftbtn.className = 'egret-switchframe-leftbtn';
+			}
+			api.setFrameGroupIndex({
+				name : 'framegroup01',
+				index : frameIndex,
+				scroll : false
+			});
+		}
+
+		// 打开第一个framegroup
+		function openFirstFramegroup() {
+			api.openFrameGroup({
+				name : 'framegroup01',
+				background : '#FFF',
+				scrollEnabled : false,
+				rect : {
+					x : 0,
+					y : firstHeaderOffset.h,
+					w : "auto",
+					h : api.frameHeight - firstHeaderOffset.h - firstHeaderIndexHeight - footerPos.h
+				},
+				index : 0,
+				frames : [{
+					name : 'second_frame',
+					url : './html/second_frame/second_frame_body.html',
+					bounces : false,
+				}, {
+					name : 'second_frame_disclist_body',
+					url : './html/second_frame/disclist_body.html',
+					bounces : false,
+				}]
+			}, function(ret) {
+				if (ret.name == 'second_frame_disclist_body') {
+					setFirstFramegroupIndex(1);
+				} else if (ret.name == 'second_frame') {
+					setFirstFramegroupIndex(0);
+				}
+			});
+		}
+
+		// -----------------------------------
+		// 第二个framegroup
+		// -----------------------------------
+		function setSecondFramegroupIndex(frameIndex) {
+			if (frameIndex === 0) {
+				var thridHeader = document.getElementById('thridHeader');
+				var thridHeader = $api.offset(thridHeader);
+				// 清除右部class
+				var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[1];
+				var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[1];
+				// 注意，类名的前面有一个空格
+				rightbtn.className = 'egret-switchframe-rightbtn';
+				leftbtn.className = 'egret-switchframe-leftbtn egret-switchframe-selectswitch';
+			} else {
+				var thridHeader = document.getElementById('thridHeader');
+				var thridHeader = $api.offset(thridHeader);
+				// 清除左部class
+				var leftbtn = document.getElementsByClassName('egret-switchframe-leftbtn')[1];
+				var rightbtn = document.getElementsByClassName('egret-switchframe-rightbtn')[1];
+				rightbtn.className = 'egret-switchframe-rightbtn egret-switchframe-selectswitch';
+				leftbtn.className = 'egret-switchframe-leftbtn';
+				//发送拼车单司机点击我的订单事件
+				api.sendEvent({
+    			name: 'myPinCheOrder',
+    			extra: {
+        		key: 'click'
+   				 }
+				});
+				}
+			api.setFrameGroupIndex({
+				name : 'framegroup02',
+				index : frameIndex,
+				scroll : false
+			});
+		}
+
+		// 打开第二个framegroup
+		function openSecondFramegroup() {
+			api.openFrameGroup({
+				name : 'framegroup02',
+				background : '#FFF',
+				scrollEnabled : false,
+				rect : {
+					x : 0,
+					y : firstHeaderOffset.h,
+					w : "auto",
+					h : api.frameHeight - firstHeaderOffset.h - footerPos.h
+				},
+				index : 0,
+				frames : [{
+					name : 'third_frame_body',
+					url : './html/third_frame/third_frame_body.html',
+					bounces : false,
+				}, {
+					name : 'third_frame_disclist_body',
+					url : './html/third_frame/disclist_body.html',
+					bounces : false,
+				}]
+			}, function(ret) {
+			});
+		}
+
+		// 打开frame
+		function openframeinstance(frame, marginTop, isBounce) {
+			api.openFrame({
+				name : frame,
+				url : './html/' + frame + '/' + frame + '_body.html',
+				rect : {
+					x : 0,
+					y : marginTop,
+					w : 'auto',
+					h : api.frameHeight - marginTop - footerPos.h
+				},
+				// pageParam: {name: marginTop + footerPos.h},
+				bounces : false,
+				vScrollBarEnabled : false,
+				hScrollBarEnabled : false,
+				delay : 200
+			});
+		}
+
+		// 移动滑动块
+		function sliderbarCallback(id, num) {
+			// 得到背景元素的宽度
+			// var width=parseInt(window.getComputedStyle($api.byId('matchwidth'),null).width);
+			var width = parseInt(api.frameWidth / 2);
+			// api.alert({msg:width});
+			if (num != 0) {
+				num = width;
+			}
+			// 移动背景元素的宽度  在index.html不能获得 forth_frame.html上面的dom，虽然是在同一个手机屏幕上
+			$api.css($api.byId(id), "-webkit-transform:translate(" + num + "px,0)");
+		}
+
+		// ===================================
+		// 响应底部按钮的切换frame
+		// ===================================
+		function switchframe(type) {
+			// alert(firstHeaderOffset.h);
+			switch (type) {
+				case 'home_frame':
+					randomSwitchBtn('home_frame', 0);
+					hideAllFrame();
+					if (isHomeOpen) {
+						showframe('home_frame');
+					} else {
+						openframeinstance('home_frame', firstHeaderOffset.h, false);
+						isHomeOpen = true;
+					}
+					break;
+				case 'second_frame':
+					randomSwitchBtn('second_frame', 1);
+					hideAllFrame();
+					if (isSecondOpen) {
+						showgroup('framegroup01');
+					} else {
+						openFirstFramegroup();
+						isSecondOpen = true;
+					}
+					// openframeinstance('first_frame', firstHeaderOffset.h, false);
+					break;
+				case 'third_frame':
+					randomSwitchBtn('third_frame', 2);
+					hideAllFrame();
+					if (isThirdOpen) {
+						showgroup('framegroup02');
+					} else {
+						openSecondFramegroup();
+						isThirdOpen = true;
+					}
+					// openframeinstance('third_frame', firstHeaderOffset.h, false);
+					// openLeftgroup();
+					// showframe('third_frame');
+					break;
+				case 'forth_frame':
+					randomSwitchBtn('forth_frame', 3);
+					hideAllFrame();
+					if (isForthOpen) {
+						showframe('forth_frame');
+					} else {
+						openframeinstance('forth_frame', firstHeaderOffset.h, false);
+						isForthOpen = true;
+					}
+					// showgroup('forth_frame');
+					break;
+				default:
+					break;
+			}
+		}
+
+		// 完成首页初始化
+		apiready = function() {
+			// 设置ios7的标题栏字体变亮，全局用一个就行了
+			api.setStatusBarStyle({
+				style : 'dark'
+			});
+			firstHeader = $api.byId('firstHeader');
+			secHeader = $api.byId('secHeader');
+			thirdHeader = $api.byId('thridHeader');
+			fortheader = $api.byId('fortheader');
+			var fortheader = $api.byId('fortheader');
+			var firstHeaderIndex = $api.byId('firstHeaderIndex');
+			$api.fixIos7Bar(firstHeader);
+			$api.fixIos7Bar(secHeader);
+			$api.fixIos7Bar(thirdHeader);
+			$api.fixIos7Bar(fortheader);
+			// TODO 一定记得修改
+			firstHeaderOffset = $api.offset(firstHeader);
+			firstHeaderIndexHeight = $api.offset(firstHeaderIndex).h;
+			firstHeaderOffset.h -= firstHeaderIndexHeight;
+			var main = $api.byId('main');
+			var mainPos = $api.offset(main);
+			var footer = $api.byId('footer');
+			var footerPos = $api.offset(footer);
+			// 第一次进入打开 home_frame body
+			var scrollHeight = $api.dom('.navbar').offsetHeight;
+			$api.byId('navmark').style.width = api.winWidth / 4 + 'px';
+			openFirstFramegroup();
+			//openSecondFramegroup();//拼车
+			hideAllFrame();
+			openframeinstance('home_frame', firstHeaderOffset.h, false);
+			isHomeOpen = true;
+			isSecondOpen = true;
+		
+			api.openFrameGroup({
+				name : 'framegroup02',
+				background : '#FFF',
+				scrollEnabled : false,
+				rect : {
+					x : 0,
+					y : firstHeaderOffset.h,
+					w : "auto",
+					h : api.frameHeight - firstHeaderOffset.h - footerPos.h
+				},
+				index : 0,
+				frames : [{
+					name : 'third_frame_body',
+					url : './html/third_frame/third_frame_body.html',
+					bounces : false,
+				}, {
+					name : 'third_frame_disclist_body',
+					url : './html/third_frame/disclist_body.html',
+					bounces : false,
+				}]
+			}, function(ret) {
+			isThirdOpen = true;
+			});
+		
+			var db = api.require('db');
+			db.openDatabase({
+				name : 'order'
+			}, function(ret, err) {
+				if (ret.status) {
+					var sql = 'CREATE TABLE IF NOT EXISTS Data(Id int  PRIMARY KEY NOT NULL, From_user varchar(255), Address varchar(255), Locationx varchar(50), Locationy varchar(50),Mobile varchar(11),Status char(2) )';
+					db.executeSql({
+						name : 'order',
+						sql : sql
+					}, function(ret, err) {
+						if (ret.status) {
+							//api.alert({
+							//msg : '执行SQL成功'
+							//});
+						} else {
+							api.alert({
+								msg : err.msg
+							});
+						}
+					});
+					//拼车数据表
+					var sqlP = 'CREATE TABLE IF NOT EXISTS DataPinChe(Id int  PRIMARY KEY NOT NULL, Img varchar(255), Start varchar(255), End varchar(255), Gotime varchar(50),	People varcahr(5), Slat varchar(50), Slng varchar(50), Elat varchar(50), Elng varchar(50), Mobile varchar(11), Type varchar(20),Sname varchar(30),Jname varchar(30),Stel varchar(11),Status char(2) )';
+					db.executeSql({
+						name : 'order',
+						sql : sqlP
+					}, function(ret, err) {
+						if (ret.status) {
+							//api.alert({
+							//msg : '执行SQL成功'
+							//});
+						} else {
+							api.alert({
+								msg : err.msg
+							});
+						}
+					});
+				} else {
+					api.alert({
+						msg : err.msg
+					});
+				}
+			});
+		
+			//判断是否登录
+			var loginStatus = $api.getStorage('login');
+			if (loginStatus != 1) {
+				hideAllFrame();
+				login();
+			}
+			//判断是否上线
+			api.getPrefs({
+				key : 'onLine'
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.value == 1) {
+						var on = $api.byId('onl');
+						on.checked = true;
+						//自动上线
+						var didValue = $api.getStorage('did');
+						var ajpush = api.require('ajpush');
+					ajpush.init(function(ret) {
+						if (ret && ret.status) {
+							 ajpush.onResume();
+							  driverStatus(1,didValue);
+						}
+					});
+
+					}
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+			//监听网络
+			api.addEventListener({
+				name : 'offline'
+			}, function(ret, err) {
+				//operation
+				api.toast({
+					msg : '网络错误,请检查网络设置',
+					duration : 2000,
+					location : 'bottom'
+				});
+			});
+			//禁止休眠
+			api.setKeepScreenOn({
+    		keepOn: true
+    		});
+			//处理本地页面缓存，判断用户应用当前所处状态
+			var currentPage = $api.getStorage('arrive');
+			if(currentPage == 1){
+			//接客页面
+			api.openWin({
+				name : 'arrive_user',
+				url : './html/arrive_user.html',
+				delay : 200
+				});
+			}else if(currentPage == 2){
+			//送客页面
+			api.openWin({
+				name : 'arrive_user',
+				url : './html/arrive_user.html',
+				delay : 200
+				});
+				$api.setStorage('from', 2);
+			}else{
+			//已经送达乘客不处理
+			}
+			//监听gps事件
+			var gpsmodel = api.require('gpsState');
+			 gpsmodel.gpsstate(function(ret) {
+			 if(ret.gps == false ){
+			 gpsmodel.opengps();
+			 }
+			 });
+			//新增推送订单和消息统一监听，然后广播
+			var mipush = api.require('mipush');
+			mipush.setListener(function(ret) {
+				if (ret) {
+				    var msg = ret.content;
+					var content = $api.strToJson(msg);
+					if(content['type'] == 'location'||content['type'] == 'text'||content['type'] == 'view'){
+						api.sendEvent({
+						name : 'dachemsg',
+						extra : content
+						});
+						return false;
+					}
+				  if(content['type'] == 'view_pinche'||content['type'] == 'view_huoyun'){
+						api.sendEvent({
+						name : 'pinchemsg',
+						extra : content
+						});
+						return false;
+					}
+					
+				}
+			});
+		};
+	</script>
+</html>
